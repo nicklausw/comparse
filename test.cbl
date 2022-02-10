@@ -1,10 +1,12 @@
-       identification division.
-       program-id. doublenumber.
-       environment division.
-       data division.
-       linkage section.
-       01 num binary-double unsigned.
-       procedure division using num.
-           multiply 2 by num.
-           move num to return-code.
-           exit program.
+              identification division.
+              program-id. cobolstuff.
+              environment division.
+       
+              data division.
+              linkage section.
+              01 coolstring pic x(2000).
+       
+              procedure division using by reference coolstring.
+                  string "This is COBOL!\" into coolstring.
+                  exit program.
+       
