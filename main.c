@@ -18,7 +18,13 @@ void on_message(struct discord *client, const struct discord_message *msg)
 
   int number = atoi(msg->content);
 
-  char* s;
+  // make sure input has no garbage.
+  char s[2000];
+  for(int c = 0; c < 2000; c++) {
+    s[c] = '\0';
+  }
+  strcpy(s, msg->content);
+  
   cobolstuff(s);
   for(int c = 0; c < strlen(s); c++) {
     // COBOL strings don't end with zero.
