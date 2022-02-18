@@ -15,8 +15,7 @@
 
          01 outnumber pic s9(9)v9(9).
 
-       procedure division
-               using by reference token_list, outnumber.
+       procedure division using by reference token_list, outnumber.
          move 2 to i
          perform varying i from 2 by 1 until token_type(i) = ';'
            if token_type(i) = '+' then
@@ -38,6 +37,5 @@
            else if token_type(i) = ';' then
              exit perform
            end-if
-           display "result: " outnumber
          end-perform
          exit program.

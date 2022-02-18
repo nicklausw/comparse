@@ -131,12 +131,11 @@
              string '\' into c_communication
          end-perform
 
-         string outnumber into c_communication
+         string outnumber '\' into c_communication
          
          exit program.
 
       parenthLoop.
-           display "logging parentheses loop."
            *> we need the semicolon's position.
            perform varying counter from 1 by 1 until counter = 2000
                if token_type(counter) = ';' then
@@ -151,18 +150,6 @@
                  move counter to parenth_pos
              end-if
              if token_type(counter) = '(' then
-                 display "contents before hellish loop:"
-                 perform varying q from 1 by 1 until token_type(q) = ';'
-                     if token_type(q) = 'N' then
-                         display num(q) with no advancing
-                     else
-                         display token_type(q) with no advancing
-                     end-if
-                     if q = current_token then
-                         exit perform
-                     end-if
-                 end-perform
-                 display " "
                  *> say we have a statement: (N+(N*N));
                  *> adding 1 to counter focuses on the second N. we're going backwards.
                  add 1 to counter giving counter
@@ -185,6 +172,7 @@
                  string 'N' into token_type(counter)
                  add 1 to counter giving counter
                  move counter to j
+                 subtract 1 from j giving j
                  add parenthsize to j giving j
                  *> counter is at dest, j is at src.
                  perform varying j from j by 1 until token_type(j) = ';'
@@ -194,20 +182,9 @@
                      add 1 to counter giving counter
                  end-perform
 
+                 subtract 1 from counter giving counter
                  string ';' into token_type(counter)
                  
                  move 0 to foundParentheses
-                 display "contents after hellish loop:"
-                 perform varying q from 1 by 1 until token_type(q) = ';'
-                     if token_type(q) = 'N' then
-                         display num(q) with no advancing
-                     else
-                         display token_type(q) with no advancing
-                     end-if
-                     if token_type(q) = ';' then
-                         exit perform
-                     end-if
-                 end-perform
-                 display " "
              end-if
          end-perform.
