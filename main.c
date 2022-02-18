@@ -64,17 +64,11 @@ int main(int argc, char **argv)
     printf("wrong number of args\n");
     return 1;
   }
-
-  /* initialize the COBOL run-time library */
-  cob_init(0, NULL);
   
   struct discord *client = discord_init(argv[1]);
   discord_set_on_ready(client, &on_ready);
   discord_set_on_message_create(client, &on_message);
   discord_run(client);
-
-  /* shutdown the COBOL run-time library, keep program running */
-  (void)cob_tidy();
 
   return 0;
 }
