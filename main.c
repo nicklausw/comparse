@@ -28,13 +28,23 @@ void on_message(struct discord *client, const struct discord_message *msg)
   
   mathParse(s);
 
+  // output can also have garbage
+  for(int c = 0; c < 2000; c++) {
+    if(s[c] == '\\') {
+      s[c] = '\0';
+      break;
+    }
+  }
+  
   bool isNumber = true;
-  for(int c = 0; c < strlen(s); c++) {
+  for(int c = 1; c < strlen(s); c++) {
     if(!isdigit(s[c])) {
       isNumber = false;
       break;
     }
   }
+
+  printf("I'm working with %s\n", s);
 
   if(isNumber == true) {
     char newOutput[20];

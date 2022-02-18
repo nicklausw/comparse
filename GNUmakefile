@@ -1,4 +1,4 @@
-files := main.c mathParse.cbl
+files := main.c mathParse.cbl calculate.cbl
 ofiles := $(subst .c,.o,$(subst .cbl,.o,$(files)))
 
 main: $(ofiles)
