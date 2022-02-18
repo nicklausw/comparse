@@ -9,14 +9,6 @@
            01 math_string pic x(2000).
            01 i pic 9(9) value 0.
 
-      *    These are our possible tokens.
-           01 tok_end pic 9 value 0.
-           01 tok_num pic 9 value 1.
-           01 tok_add pic 9 value 2.
-           01 tok_sub pic 9 value 3.
-           01 tok_mul pic 9 value 4.
-           01 tok_div pic 9 value 5.
-
            01 building_number pic x(1) value 'F'.
            01 building_offset pic 9(9) value 0.
            01 building_space pic x(100) value zeroes.
@@ -24,7 +16,7 @@
            01 current_token pic 9(9) value 1.
 
            01 token_list.
-               05 token_type pic 9 value 0 occurs 2000 times.
+               05 token_type pic x(1) value ';' occurs 2000 times.
                05 num pic s9(9)v9(9) value 0 occurs 2000 times.
 
            01 outnumber pic s9(9)v9(9) value 0.
@@ -42,7 +34,7 @@
            move 1 to current_token
 
            perform varying i from 1 by 1 until i = 2000
-               move 0 to token_type(i)
+               string ';' into token_type(i)
                move 0 to num(1)
            end-perform
 
@@ -63,16 +55,16 @@
                    if (math_string(i:1) is numeric) or
                       (math_string(i:1) = '.') then
                        string 'T' into building_number
-                       move tok_num to token_type(current_token)
+                       string 'N' into token_type(current_token)
                        move 1 to building_offset
                        move math_string(i:1) to
                            building_space(building_offset:1)
                        add 1 to building_offset giving building_offset
                        exit perform cycle
                    else
-                       call 'symbolType'
-                           using i, token_type(i), math_string
-                       if token_type(current_token) = tok_end then
+                       move math_string(i:1) to
+                       token_type(current_token)
+                       if token_type(current_token) = ';' then
                            exit perform
                        end-if
                        add 1 to current_token giving current_token
@@ -90,9 +82,9 @@
                        unstring building_space(1:building_offset)
                            into num(current_token)
                        add 1 to current_token giving current_token
-                       call 'symbolType'
-                           using i, token_type(i), math_string
-                       if token_type(current_token) = tok_end then
+                       move math_string(i:1) to
+                       token_type(current_token)
+                       if token_type(current_token) = ';' then
                            exit perform
                        end-if
                        add 1 to current_token giving current_token
@@ -106,7 +98,7 @@
                string "Nothing to do." into c_communication
                exit section
            end-if
-           if token_type(1) <> tok_num then
+           if token_type(1) <> 'N' then
                string "First token must be a number."
                    into c_communication
                exit section
@@ -115,19 +107,19 @@
            move num(1) to outnumber
 
            perform varying i from 2 by 1 until i = current_token
-               if token_type(i) = tok_add then
+               if token_type(i) = '+' then
                    add 1 to i giving i
                    add num(i) to outnumber giving outnumber
                    exit perform cycle
-               else if token_type(i) = tok_sub then
+               else if token_type(i) = '-' then
                    add 1 to i giving i
                    subtract num(i) from outnumber giving outnumber
                    exit perform cycle
-               else if token_type(i) = tok_mul then
+               else if token_type(i) = '*' then
                    add 1 to i giving i
                    multiply num(i) by outnumber giving outnumber
                    exit perform cycle
-               else if token_type(i) = tok_div then
+               else if token_type(i) = '/' then
                    add 1 to i giving i
                    divide outnumber by num(i) giving outnumber
                    exit perform cycle

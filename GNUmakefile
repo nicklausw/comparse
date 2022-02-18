@@ -1,4 +1,4 @@
-files := main.c symbolType.cbl mathParse.cbl
+files := main.c mathParse.cbl
 
 main: $(files)
 	cobc -g -x -o main $(files) -fstatic-call -lcob -ldiscord -lcurl
