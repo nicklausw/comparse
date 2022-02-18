@@ -111,17 +111,7 @@
            end-if
          end-perform
 
-         if current_token < 3 then
-           string "Nothing to do." into c_communication
-           exit section
-         end-if
-         if token_type(1) <> 'N' then
-           string "First token must be a number."
-             into c_communication
-           exit section
-         end-if
-
-     *>        parentheses blocks are trouble. let's resolve them.
+     *>  parentheses blocks are trouble. let's resolve them.
          move 0 to foundParentheses
          perform parenthLoop until foundParentheses = 1
 
@@ -138,7 +128,7 @@
          
          exit program.
 
-      parenthLoop.
+         parenthLoop.
            *> we need the semicolon's position.
            perform varying counter from 1 by 1 until counter = 2000
                if token_type(counter) = ';' then
@@ -147,7 +137,7 @@
            end-perform
            move counter to endbound
            
-           perform varying counter from endbound by -1 until counter = 1
+           perform varying counter from endbound by -1 until counter = 0
              move 1 to foundParentheses
              if token_type(counter) = ')' then
                  move counter to parenth_pos
@@ -173,21 +163,20 @@
                  *> replace start parenthesis with evaluated number.
                  move parenthnumber to num(counter)
                  string 'N' into token_type(counter)
-                 add 1 to counter giving counter
                  move counter to j
-                 subtract 1 from j giving j
                  add parenthsize to j giving j
+                 add 2 to j giving j
+                 add 1 to counter giving counter
                  *> counter is at dest, j is at src.
                  perform varying j from j by 1 until token_type(j) = ';'
                      move token_type(j) to token_type(counter)
                      move num(j) to num(counter)
-                     add 1 to j giving j
                      add 1 to counter giving counter
                  end-perform
 
-                 subtract 1 from counter giving counter
                  string ';' into token_type(counter)
                  
                  move 0 to foundParentheses
+                 exit perform
              end-if
          end-perform.
