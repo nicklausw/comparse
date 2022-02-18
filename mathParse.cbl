@@ -65,11 +65,11 @@
            end-if
          end-perform
          if counter = 2000 then
-           string  "No semicolon found." into c_communication
+           string  "No semicolon found.\" into c_communication
            exit section.
 
       *> first: split into tokens.
-         perform varying counter from 1 by 1 until counter = 2000
+           perform varying counter from 1 by 1 until counter = 2000
       *> if we're still getting a number's contents...
              if math_string(counter:1) = ' ' then
                  exit perform cycle
@@ -89,6 +89,21 @@
                if token_type(current_token) = ';' then
                  exit perform
                end-if
+              
+               if token_type(current_token) = '(' then
+                   if counter > 1 then
+                       subtract 1 from current_token giving current_token
+                       if token_type(current_token) = 'N' or token_type(current_token) = ')' then
+                           *> implied multiplication
+                           add 1 to current_token giving current_token
+                           string '*' into token_type(current_token)
+                           add 1 to current_token giving current_token
+                           string '(' into token_type(current_token)
+                       else
+                           add 1 to current_token giving current_token
+                       end-if
+                   end-if
+               end-if
                add 1 to current_token giving current_token
              end-if
            else
@@ -106,6 +121,21 @@
                if token_type(current_token) = ';' then
                  exit perform
                end-if
+               if token_type(current_token) = '(' then
+                   if counter > 1 then
+                       subtract 1 from current_token giving current_token
+                       if token_type(current_token) = 'N' or token_type(current_token) = ')' then
+                           *> implied multiplication
+                           add 1 to current_token giving current_token
+                           string '*' into token_type(current_token)
+                           add 1 to current_token giving current_token
+                           string '(' into token_type(current_token)
+                       else
+                           add 1 to current_token giving current_token
+                       end-if
+                   end-if
+               end-if
+
                add 1 to current_token giving current_token
              end-if
            end-if

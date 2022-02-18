@@ -4,8 +4,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
-extern char *mathParse(char*);
+extern void *mathParse(char*);
+
+bool startsWith(char *a, char *b)
+{
+  for(int c = 0; c < strlen(a); c++) {
+    if(!isdigit(a[c])) {
+      a[c] = tolower(a[c]);
+    }
+  }
+  if(strncmp(a, b, strlen(b)) == 0) return 1;
+  return 0;
+}
 
 void on_ready(struct discord *client) 
 {
@@ -24,12 +36,14 @@ void on_message(struct discord *client, const struct discord_message *msg)
   }
   strcpy(s, msg->content);
 
-  if(strlen(msg->content) < strlen("DoMath ") + 1) {
+  if(strlen(s) < strlen("domath ") + 1) {
     return;
   }
-  if(strncmp(msg->content, "DoMath ", strlen("DoMath ")) == 1) {
+  if(!startsWith(s, "domath ")) {
     return;
   }
+  // append a semicolon so you don't have to.
+  strcat(s, ";");
 
   memcpy(s,&s[7],strlen(s) - 7);  
   mathParse(s);
