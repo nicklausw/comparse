@@ -1,7 +1,13 @@
 files := main.c mathParse.cbl
+ofiles := $(subst .c,.o,$(subst .cbl,.o,$(files)))
 
-main: $(files)
-	cobc -g -x -o main $(files) -fstatic-call -lcob -ldiscord -lcurl
+main: $(ofiles)
+	cobc -g -x -o main $(ofiles) -fstatic-call -lcob -ldiscord -lcurl
+
+%.o: %.c
+	gcc -c $<
+%.o: %.cbl
+	cobc -c $<
 
 clean:
-	rm -f main
+	rm -f main $(ofiles)
