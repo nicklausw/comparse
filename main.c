@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 extern char *cobolstuff(char *coolstring);
 
@@ -26,11 +27,31 @@ void on_message(struct discord *client, const struct discord_message *msg)
   strcpy(s, msg->content);
   
   cobolstuff(s);
+
+  bool isNumber = true;
   for(int c = 0; c < strlen(s); c++) {
-    // COBOL strings don't end with zero.
-    // so I chose this symbol for it.
-    if(s[c] == '\\') s[c] = '\0';
+    if(!isdigit(s[c])) {
+      isNumber = false;
+      break;
+    }
   }
+
+  if(isNumber == true) {
+    char newOutput[20];
+    for(int c = 0; c < 20; c++) {
+      if(c == 9) {
+	newOutput[c] = '.';
+      } else if(c > 9) {
+	newOutput[c] = s[c - 1];
+      } else if(c == 19) {
+	newOutput[c] = '\0';
+      } else {
+	newOutput[c] = s[c];
+      }
+    }
+    sprintf(s, "%.2f", atof(newOutput));
+  }
+  
 
   discord_async_next(client, NULL); // make next request non-blocking (OPTIONAL)
   struct discord_create_message_params params = { .content = s };
