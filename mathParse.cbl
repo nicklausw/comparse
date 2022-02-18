@@ -70,7 +70,10 @@
 
       *> first: split into tokens.
          perform varying counter from 1 by 1 until counter = 2000
-      *>   if we're still getting a number's contents...
+      *> if we're still getting a number's contents...
+             if math_string(counter:1) = ' ' then
+                 exit perform cycle
+             end-if
            if building_number = 'F' then
              if (math_string(counter:1) is numeric) or
               (math_string(counter:1) = '.') then

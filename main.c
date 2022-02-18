@@ -17,15 +17,21 @@ void on_message(struct discord *client, const struct discord_message *msg)
 {
   if (msg->author->bot) return;
 
-  int number = atoi(msg->content);
-
   // make sure input has no garbage.
   char s[2000];
   for(int c = 0; c < 2000; c++) {
     s[c] = '\0';
   }
   strcpy(s, msg->content);
-  
+
+  if(strlen(msg->content) < strlen("DoMath ") + 1) {
+    return;
+  }
+  if(strncmp(msg->content, "DoMath ", strlen("DoMath ")) == 1) {
+    return;
+  }
+
+  memcpy(s,&s[7],strlen(s) - 7);  
   mathParse(s);
 
   // output can also have garbage.
