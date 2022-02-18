@@ -1,5 +1,7 @@
-main: main.c test.cbl
-	cobc -g -x -o main main.c test.cbl -fstatic-call -lcob -ldiscord -lcurl
+files := main.c symbolType.cbl mathParse.cbl
+
+main: $(files)
+	cobc -g -x -o main $(files) -fstatic-call -lcob -ldiscord -lcurl
 
 clean:
 	rm -f main

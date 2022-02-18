@@ -1,5 +1,5 @@
        identification division.
-       program-id. cobolstuff.
+       program-id. mathParse.
        environment division.
        
        data division.
@@ -70,24 +70,9 @@
                        add 1 to building_offset giving building_offset
                        exit perform cycle
                    else
-                       if math_string(i:1) = '*' then
-                           move tok_mul to token_type(current_token)
-                           add 1 to current_token giving current_token
-                           exit perform cycle
-                       else if math_string(i:1) = '+' then
-                           move tok_add to token_type(current_token)
-                           add 1 to current_token giving current_token
-                           exit perform cycle
-                       else if math_string(i:1) = '-' then
-                           move tok_sub to token_type(current_token)
-                           add 1 to current_token giving current_token
-                           exit perform cycle
-                       else if math_string(i:1) = '/' then
-                           move tok_div to token_type(current_token)
-                           add 1 to current_token giving current_token
-                           exit perform cycle
-                       else if math_string(i:1) = ';' then
-                           move tok_end to token_type(current_token)
+                       call 'symbolType'
+                           using i, token_type(i), math_string
+                       if token_type(current_token) = tok_end then
                            exit perform
                        end-if
                        add 1 to current_token giving current_token
@@ -105,24 +90,9 @@
                        unstring building_space(1:building_offset)
                            into num(current_token)
                        add 1 to current_token giving current_token
-                        if math_string(i:1) = '*' then
-                           move tok_mul to token_type(current_token)
-                           add 1 to current_token giving current_token
-                           exit perform cycle
-                       else if math_string(i:1) = '+' then
-                           move tok_add to token_type(current_token)
-                           add 1 to current_token giving current_token
-                           exit perform cycle
-                       else if math_string(i:1) = '-' then
-                           move tok_sub to token_type(current_token)
-                           add 1 to current_token giving current_token
-                           exit perform cycle
-                       else if math_string(i:1) = '/' then
-                           move tok_div to token_type(current_token)
-                           add 1 to current_token giving current_token
-                           exit perform cycle
-                       else if math_string(i:1) = ';' then
-                           move tok_end to token_type(current_token)
+                       call 'symbolType'
+                           using i, token_type(i), math_string
+                       if token_type(current_token) = tok_end then
                            exit perform
                        end-if
                        add 1 to current_token giving current_token

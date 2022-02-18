@@ -5,7 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 
-extern char *cobolstuff(char *coolstring);
+extern char *mathParse(char*);
 
 void on_ready(struct discord *client) 
 {
@@ -26,7 +26,7 @@ void on_message(struct discord *client, const struct discord_message *msg)
   }
   strcpy(s, msg->content);
   
-  cobolstuff(s);
+  mathParse(s);
 
   bool isNumber = true;
   for(int c = 0; c < strlen(s); c++) {
