@@ -6,14 +6,15 @@ gfiles := $(subst .cbl,.c,$(cblfiles)) \
 	  $(subst .cbl,.c.l.h,$(cblfiles)) \
 	  $(subst .cbl,.c.h,$(cblfiles)) \
 	  $(subst .cbl,.i,$(cblfiles))
+flags := -O2 -Wall
 
 main: $(ofiles)
-	gcc -O2 -o main $(ofiles) -pthread -lcob -ldiscord -lcurl
+	gcc $(flags) -o main $(ofiles) -pthread -lcob -ldiscord -lcurl
 
 %.o: %.c
-	gcc -Wall -c $< -o $@
+	gcc $(flags) -c $< -o $@
 %.o: %.cbl
-	cobc -Wall -F -fimplicit-init -fstatic-call -c $< -o $@
+	cobc $(flags) -Wall -F -fimplicit-init -fstatic-call -c $< -o $@
 
 clean:
 	rm -f main $(ofiles) $(gfiles)

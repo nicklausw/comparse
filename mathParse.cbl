@@ -25,26 +25,30 @@
 
          01 token_list.
            05 token_type pic x(1) value ';' occurs 2000 times.
-           05 num pic s9(9)v9(9) value 0 occurs 2000 times.
+           05 num usage float-long value 0 occurs 2000 times.
 
          01 alt_list.
             05 alt_token_type pic x(1) value ';' occurs 2000 times.
-            05 alt_num pic s9(9)v9(9) value 0 occurs 2000 times.
+            05 alt_num usage float-long value 0 occurs 2000 times.
            
-         01 outnumber pic s9(9)v9(9) value 0.
+         01 outnumber usage float-long value 0.
 
-         01 parenthnumber pic s9(9)v9(9) value 0.
+         01 parenthnumber usage float-long value 0.
      
        linkage section.
          01 c_communication pic x(2000).
+         01 finalnumber usage float-long.
+         01 didwefinish pic x(1) value 'F'.
      
-       procedure division using by reference c_communication.
+       procedure division
+         using by reference c_communication, finalnumber, didwefinish.
       *> copy input to where we can work with it piece-by-piece.
          move c_communication to math_string
 
          move 0 to outnumber
          move 0 to parenthnumber
          string 'F' into building_number
+         string 'F' into didwefinish
          move 1 to current_token
 
          perform varying counter from 1 by 1 until counter = 2000
@@ -154,7 +158,8 @@
              string '\' into c_communication
          end-perform
 
-         string outnumber '\' into c_communication
+         move outnumber to finalnumber
+         string 'T' into didwefinish
          
          exit program.
 
@@ -207,6 +212,15 @@
                  string ';' into token_type(counter)
                  
                  move 0 to foundParentheses
+
+                 *>perform varying counter from 1 by 1 until token_type(counter) = ';'
+                 *>    if token_type(counter) = 'N' then
+                 *>        display num(counter) with no advancing
+                 *>    else
+                 *>        display token_type(counter) with no advancing
+                 *>    end-if
+                 *>end-perform
+                 *>display " "
                  exit perform
              end-if
          end-perform.

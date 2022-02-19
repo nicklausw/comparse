@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-extern void *mathParse(char*);
+extern void *mathParse(char*,double*,char*);
 
 bool startsWith(char *a, char *b)
 {
@@ -28,6 +28,8 @@ void on_ready(struct discord *client)
 void on_message(struct discord *client, const struct discord_message *msg)
 {
   if (msg->author->bot) return;
+  double finalResult = 0;
+  char didWeFinish = ' ';
 
   // make sure input has no garbage.
   char s[2000];
@@ -46,7 +48,7 @@ void on_message(struct discord *client, const struct discord_message *msg)
   strcat(s, ";");
 
   memcpy(s,&s[7],strlen(s) - 7);  
-  mathParse(s);
+  mathParse(s,&finalResult,&didWeFinish);
 
   // output can also have garbage.
   for(int c = 0; c < 2000; c++) {
@@ -55,29 +57,8 @@ void on_message(struct discord *client, const struct discord_message *msg)
       break;
     }
   }
-  
-  bool isNumber = true;
-  for(int c = 1; c < strlen(s); c++) {
-    if(!isdigit(s[c])) {
-      isNumber = false;
-      break;
-    }
-  }
-  
-  if(isNumber == true) {
-    char newOutput[20];
-    for(int c = 0; c < 20; c++) {
-      if(c == 9) {
-	newOutput[c] = '.';
-      } else if(c > 9) {
-	newOutput[c] = s[c - 1];
-      } else if(c == 19) {
-	newOutput[c] = '\0';
-      } else {
-	newOutput[c] = s[c];
-      }
-    }
-    sprintf(s, "%.2f", atof(newOutput));
+  if(didWeFinish == 'T') {
+    sprintf(s, "%.2f", finalResult);
   }
   
 

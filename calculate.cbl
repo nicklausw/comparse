@@ -9,11 +9,11 @@
        linkage section.
          01 token_list.
            05 token_type pic x(1) occurs 2000 times.
-           05 num pic s9(9)v9(9) occurs 2000 times.
+           05 num usage float-long occurs 2000 times.
          01 current_token pic 9(9).
        
 
-         01 outnumber pic s9(9)v9(9).
+         01 outnumber usage float-long.
 
        procedure division using by reference token_list, outnumber.
          move 2 to i
