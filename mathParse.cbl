@@ -71,6 +71,8 @@
            string "No semicolon found.\" into c_communication
            exit section.
 
+         move 0 to parenthsize
+
       *>first: split into tokens.
          perform varying counter from 1 by 1 until counter = 2000
       *>if we're still getting a number's contents...
@@ -92,8 +94,25 @@
                if token_type(current_token) = ';' then
                   exit perform
                end-if
+
+               if token_type(current_token) = ')' then
+                 subtract 1 from parenthsize giving parenthsize
+                 if parenthsize < 0 then
+                   string "Parenthesis error.\" into c_communication
+                   exit section
+                 end-if
+                 if current_token > 1 then
+                   move current_token to j
+                   subtract 1 from j
+                   if token_type(j) = '(' then
+                     string "Parenthesis error.\" into c_communication
+                     exit section
+                   end-if
+                 end-if
+               end-if
               
                if token_type(current_token) = '(' then
+                   add 1 to parenthsize giving parenthsize
                  if counter > 1 then
                    subtract 1 from current_token giving current_token
                    if token_type(current_token) = 'N' or token_type(current_token) = ')' then
@@ -124,7 +143,24 @@
                if token_type(current_token) = ';' then
                  exit perform
                end-if
+
+               if token_type(current_token) = ')' then
+                 subtract 1 from parenthsize giving parenthsize
+                 if parenthsize < 0 then
+                   string "Parenthesis error.\" into c_communication
+                   exit section
+                 end-if
+                 if current_token > 1 then
+                   move current_token to j
+                   subtract 1 from j
+                   if token_type(j) = '(' then
+                     string "Parenthesis error.\" into c_communication
+                     exit section
+                   end-if
+                 end-if
+               end-if
                if token_type(current_token) = '(' then
+                 add 1 to parenthsize giving parenthsize
                  if counter > 1 then
                    subtract 1 from current_token giving current_token
                    if token_type(current_token) = 'N' or token_type(current_token) = ')' then
@@ -144,13 +180,32 @@
            end-if
          end-perform
 
+         if parenthsize <> 0 then
+           string "Parenthesis error.\" into c_communication
+           exit section.
+
+         move current_token to j
+         subtract 1 from j giving j
+         if token_type(j) <> 'N' and token_type(j) <> ')' then
+           string "Can't end statement with operator.\" into c_communication
+           exit section.
+         
+         move 1 to j
+         if token_type(j) <> 'N' and token_type(j) <> '(' then
+           string "Can't start statement with operator.\" into c_communication
+           exit section.
+
      *>  parentheses blocks are trouble. let's resolve them.
          move 0 to foundParentheses
          perform parenthLoop until foundParentheses = 1
 
          move num(1) to outnumber
 
-         call 'calculate' using token_list, outnumber
+         call 'calculate'
+         using token_list, outnumber, c_communication, didwefinish
+         if didwefinish <> "T" then
+           exit section
+         end-if
 
          *> clear data that was input
          perform varying counter from 1 by 1 until counter = 2000
@@ -196,7 +251,11 @@
              end-perform
              *> here's where we handle that initial number.
              move alt_num(2) to parenthnumber
-             call 'calculate' using by reference alt_list, parenthnumber
+             call 'calculate'
+             using by reference alt_list, parenthnumber, c_communication, didwefinish
+             if didwefinish <> "T" then
+               exit section
+             end-if
              *> this puts the counter back on the start parenthesis.
              subtract 1 from counter giving counter
              *> replace start parenthesis with evaluated number.
