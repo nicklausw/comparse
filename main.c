@@ -58,7 +58,7 @@ void on_message(struct discord *client, const struct discord_message *msg)
     }
   }
   if(didWeFinish == 'T') {
-    sprintf(s, "%.2f", finalResult);
+    sprintf(s, "%.3f", finalResult);
   }
   
 
