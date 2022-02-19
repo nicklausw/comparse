@@ -12,9 +12,7 @@
          01 parenthsize usage binary-long value 0.
          01 alt_pos usage binary-long value 0.
          01 endbound usage binary-long value 0.
-         01 q usage binary-long value 0.
          01 j usage binary-long value 0.
-         01 dummy usage binary-long value 0.
 
          01 building_number pic x(1) value 'F'.
          01 building_offset usage binary-long value 0.
