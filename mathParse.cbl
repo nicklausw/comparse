@@ -7,22 +7,22 @@
       *>  believe it or not, finding variable names in a language
       *>  based on English is freaking impossible.
          01 math_string pic x(2000).
-         01 foundParentheses pic 9 value 1.
-         01 counter pic 9(9) value 0.
-         01 parenthsize pic 9(9) value 0.
-         01 alt_pos pic 9(9) value 0.
-         01 endbound pic 9(9) value 0.
-         01 q pic 9(9) value 0.
-         01 j pic 9(9) value 0.
-         01 dummy pic 9(9) value 0.
+         01 foundParentheses usage binary-long value 1.
+         01 counter usage binary-long value 0.
+         01 parenthsize usage binary-long value 0.
+         01 alt_pos usage binary-long value 0.
+         01 endbound usage binary-long value 0.
+         01 q usage binary-long value 0.
+         01 j usage binary-long value 0.
+         01 dummy usage binary-long value 0.
 
          01 building_number pic x(1) value 'F'.
-         01 building_offset pic 9(9) value 0.
+         01 building_offset usage binary-long value 0.
          01 building_space pic x(100) value zeroes.
 
-         01 parenth_pos pic 9(9).
+         01 parenth_pos usage binary-long.
 
-         01 current_token pic 9(9) value 1.
+         01 current_token usage binary-long value 1.
 
          01 token_list.
            05 token_type pic x(1) value ';' occurs 2000 times.
