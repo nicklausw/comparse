@@ -14,6 +14,7 @@
          01 endbound pic 9(9) value 0.
          01 q pic 9(9) value 0.
          01 j pic 9(9) value 0.
+         01 dummy pic 9(9) value 0.
 
          01 building_number pic x(1) value 'F'.
          01 building_offset pic 9(9) value 0.
@@ -59,7 +60,7 @@
          end-perform
 
          perform varying counter from 1 by 1 until counter = 100
-             string ';' into building_space(counter:1)
+           string ';' into building_space(counter:1)
          end-perform
 
       *> end program if ending marker (semicolon) not found.
@@ -69,15 +70,15 @@
            end-if
          end-perform
          if counter = 2000 then
-           string  "No semicolon found.\" into c_communication
+           string "No semicolon found.\" into c_communication
            exit section.
 
-      *> first: split into tokens.
-           perform varying counter from 1 by 1 until counter = 2000
-      *> if we're still getting a number's contents...
-             if math_string(counter:1) = ' ' then
-                 exit perform cycle
-             end-if
+      *>first: split into tokens.
+         perform varying counter from 1 by 1 until counter = 2000
+      *>if we're still getting a number's contents...
+           if math_string(counter:1) = ' ' then
+             exit perform cycle
+           end-if
            if building_number = 'F' then
              if (math_string(counter:1) is numeric) or
               (math_string(counter:1) = '.') then
@@ -91,22 +92,22 @@
                move math_string(counter:1) to
                token_type(current_token)
                if token_type(current_token) = ';' then
-                 exit perform
+                  exit perform
                end-if
               
                if token_type(current_token) = '(' then
-                   if counter > 1 then
-                       subtract 1 from current_token giving current_token
-                       if token_type(current_token) = 'N' or token_type(current_token) = ')' then
-                           *> implied multiplication
-                           add 1 to current_token giving current_token
-                           string '*' into token_type(current_token)
-                           add 1 to current_token giving current_token
-                           string '(' into token_type(current_token)
-                       else
-                           add 1 to current_token giving current_token
-                       end-if
+                 if counter > 1 then
+                   subtract 1 from current_token giving current_token
+                   if token_type(current_token) = 'N' or token_type(current_token) = ')' then
+                     *> implied multiplication
+                     add 1 to current_token giving current_token
+                     string '*' into token_type(current_token)
+                     add 1 to current_token giving current_token
+                     string '(' into token_type(current_token)
+                   else
+                     add 1 to current_token giving current_token
                    end-if
+                 end-if
                end-if
                add 1 to current_token giving current_token
              end-if
@@ -126,18 +127,18 @@
                  exit perform
                end-if
                if token_type(current_token) = '(' then
-                   if counter > 1 then
-                       subtract 1 from current_token giving current_token
-                       if token_type(current_token) = 'N' or token_type(current_token) = ')' then
-                           *> implied multiplication
-                           add 1 to current_token giving current_token
-                           string '*' into token_type(current_token)
-                           add 1 to current_token giving current_token
-                           string '(' into token_type(current_token)
-                       else
-                           add 1 to current_token giving current_token
-                       end-if
+                 if counter > 1 then
+                   subtract 1 from current_token giving current_token
+                   if token_type(current_token) = 'N' or token_type(current_token) = ')' then
+                     *> implied multiplication
+                     add 1 to current_token giving current_token
+                     string '*' into token_type(current_token)
+                     add 1 to current_token giving current_token
+                     string '(' into token_type(current_token)
+                   else
+                     add 1 to current_token giving current_token
                    end-if
+                 end-if
                end-if
 
                add 1 to current_token giving current_token
@@ -155,7 +156,7 @@
 
          *> clear data that was input
          perform varying counter from 1 by 1 until counter = 2000
-             string '\' into c_communication
+           string '\' into c_communication
          end-perform
 
          move outnumber to finalnumber
@@ -163,64 +164,60 @@
          
          exit program.
 
-         parenthLoop.
-           *> we need the semicolon's position.
-           perform varying counter from 1 by 1 until counter = 2000
-               if token_type(counter) = ';' then
-                   exit perform
-               end-if
-           end-perform
-           move counter to endbound
+       parenthLoop.
+         perform varying counter from 1 by 1 until counter = 2000
+           string ';' into alt_token_type(counter)
+           move 0 to alt_num(counter)
+         end-perform
+
+         *> we need the semicolon's position.
+         perform varying counter from 1 by 1 until counter = 2000
+           if token_type(counter) = ';' then
+             exit perform
+           end-if
+         end-perform
+         move counter to endbound
            
-           perform varying counter from endbound by -1 until counter = 0
-             move 1 to foundParentheses
-             if token_type(counter) = ')' then
-                 move counter to parenth_pos
-             end-if
-             if token_type(counter) = '(' then
-                 *> say we have a statement: (N+(N*N));
-                 *> adding 1 to counter focuses on the second N. we're going backwards.
-                 add 1 to counter giving counter
-                 *> token indexing technically starts at 2 (1 is initial number).
-                 move 2 to alt_pos
-                 move 0 to parenthsize
-                 perform varying j from counter by 1 until j = parenth_pos
-                     move token_type(j) to alt_token_type(alt_pos)
-                     move num(j) to alt_num(alt_pos)
-                     add 1 to alt_pos giving alt_pos
-                     add 1 to parenthsize giving parenthsize
-                 end-perform
-                 *> here's where we handle that initial number.
-                 move alt_num(2) to parenthnumber
-                 call 'calculate' using by reference alt_list, parenthnumber
-                 *> this puts the counter back on the start parenthesis.
-                 subtract 1 from counter giving counter
-                 *> replace start parenthesis with evaluated number.
-                 move parenthnumber to num(counter)
-                 string 'N' into token_type(counter)
-                 move counter to j
-                 add parenthsize to j giving j
-                 add 2 to j giving j
-                 add 1 to counter giving counter
-                 *> counter is at dest, j is at src.
-                 perform varying j from j by 1 until token_type(j) = ';'
-                     move token_type(j) to token_type(counter)
-                     move num(j) to num(counter)
-                     add 1 to counter giving counter
-                 end-perform
+         perform varying counter from endbound by -1 until counter = 0
+           move 1 to foundParentheses
+           if token_type(counter) = ')' then
+             move counter to parenth_pos
+           end-if
+           if token_type(counter) = '(' then
+             *> say we have a statement: (N+(N*N));
+             *> adding 1 to counter focuses on the second N. we're going backwards.
+             add 1 to counter giving counter
+             *> token indexing technically starts at 2 (1 is initial number).
+             move 2 to alt_pos
+             move 0 to parenthsize
+             perform varying j from counter by 1 until j = parenth_pos
+               move token_type(j) to alt_token_type(alt_pos)
+               move num(j) to alt_num(alt_pos)
+               add 1 to alt_pos giving alt_pos
+               add 1 to parenthsize giving parenthsize
+             end-perform
+             *> here's where we handle that initial number.
+             move alt_num(2) to parenthnumber
+             call 'calculate' using by reference alt_list, parenthnumber
+             *> this puts the counter back on the start parenthesis.
+             subtract 1 from counter giving counter
+             *> replace start parenthesis with evaluated number.
+             move parenthnumber to num(counter)
+             string 'N' into token_type(counter)
+             move counter to j
+             add parenthsize to j giving j
+             add 2 to j giving j
+             add 1 to counter giving counter
+             *> counter is at dest, j is at src.
+             perform varying j from j by 1 until token_type(j) = ';'
+               move token_type(j) to token_type(counter)
+               move num(j) to num(counter)
+               add 1 to counter giving counter
+             end-perform
 
-                 string ';' into token_type(counter)
+             string ';' into token_type(counter)
                  
-                 move 0 to foundParentheses
-
-                 *>perform varying counter from 1 by 1 until token_type(counter) = ';'
-                 *>    if token_type(counter) = 'N' then
-                 *>        display num(counter) with no advancing
-                 *>    else
-                 *>        display token_type(counter) with no advancing
-                 *>    end-if
-                 *>end-perform
-                 *>display " "
-                 exit perform
-             end-if
+             move 0 to foundParentheses
+             exit perform
+           end-if
          end-perform.

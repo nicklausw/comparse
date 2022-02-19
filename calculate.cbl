@@ -16,7 +16,6 @@
          01 outnumber usage float-long.
 
        procedure division using by reference token_list, outnumber.
-         move 2 to i
          perform varying i from 2 by 1 until token_type(i) = ';'
            if token_type(i) = '+' then
              add 1 to i giving i
