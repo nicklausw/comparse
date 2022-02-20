@@ -163,7 +163,7 @@
                    move current_token to j
                    subtract 1 from j
                    if token_type(j) = '(' then
-                     string "Parenthesis error.\" into c_communication
+                     string z"Parenthesis error." into c_communication
                      exit section
                    end-if
                  end-if
@@ -216,10 +216,6 @@
            exit section
          end-if
 
-         *> clear data that was input
-         perform varying counter from 1 by 1 until counter = 2000
-           string '\' into c_communication
-         end-perform
          call 'gmp_sprintf' using c_communication "%Ff" outnumber returning nothing
          string 'T' into didwefinish
          
