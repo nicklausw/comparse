@@ -71,6 +71,12 @@
              exit perform cycle
            else if token_type(i) = '/' then
              add 1 to i giving i
+             call 'mpf_get_d' using numberslist(i) returning j
+             if j = 0 then
+               string z"Error: divide by zero." into c_communication
+               string 'F' into passed
+               exit section
+             end-if
              call 'mpf_div' using outnumber outnumber numberslist(i) returning nothing
              exit perform cycle
            else if token_type(i) = ';' then
