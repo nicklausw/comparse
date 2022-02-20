@@ -9,7 +9,7 @@ gfiles := $(subst .cbl,.c,$(cblfiles)) \
 flags := -O2 -Wall
 
 main: $(ofiles)
-	gcc $(flags) -o main $(ofiles) -pthread -lcob -ldiscord -lcurl
+	gcc $(flags) -o main $(ofiles) -pthread -lgmp -lcob -ldiscord -lcurl
 
 %.o: %.c
 	gcc $(flags) -c $< -o $@

@@ -1,4 +1,5 @@
 #include <concord/discord.h>
+#include <gmp.h>
 #include <libcob.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -6,7 +7,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-extern void *mathParse(char*,double*,char*);
+extern void *mathParse(char*,mpf_t*);
 
 bool startsWith(char *a, char *b)
 {
@@ -28,11 +29,10 @@ void on_ready(struct discord *client)
 void on_message(struct discord *client, const struct discord_message *msg)
 {
   if (msg->author->bot) return;
-  double finalResult = 0;
-  char didWeFinish = ' ';
+  mpf_t *finalResult = malloc(200000);
+  char *s = malloc(2000);
 
   // make sure input has no garbage.
-  char s[2000];
   for(int c = 0; c < 2000; c++) {
     s[c] = '\0';
   }
@@ -47,24 +47,13 @@ void on_message(struct discord *client, const struct discord_message *msg)
   // append a semicolon so you don't have to.
   strcat(s, ";");
 
-  memcpy(s,&s[7],strlen(s) - 7);  
-  mathParse(s,&finalResult,&didWeFinish);
-
-  // output can also have garbage.
-  for(int c = 0; c < 2000; c++) {
-    if(s[c] == '\\') {
-      s[c] = '\0';
-      break;
-    }
-  }
-  if(didWeFinish == 'T') {
-    sprintf(s, "%.3f", finalResult);
-  }
-  
-
+  memcpy(s,&s[7],strlen(s) - 7);
+  mathParse(s,*finalResult);
+ 
   discord_async_next(client, NULL); // make next request non-blocking (OPTIONAL)
   struct discord_create_message_params params = { .content = s };
   discord_create_message(client, msg->channel_id, &params, NULL);
+  
 }
 
 int main(int argc, char **argv)
@@ -78,6 +67,5 @@ int main(int argc, char **argv)
   discord_set_on_ready(client, &on_ready);
   discord_set_on_message_create(client, &on_message);
   discord_run(client);
-
   return 0;
 }
