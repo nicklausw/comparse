@@ -7,6 +7,7 @@
        working-storage section.
          01 i usage binary-long value 0.
          01 j usage binary-long value 0.
+         01 d usage binary-long.
          01 temp_counter usage binary-long value 0.
          01 temp_list.
            03 temp_token_type pic x(1) synchronized occurs 2000 times.
@@ -71,7 +72,7 @@
              exit perform cycle
            else if token_type(i) = '/' then
              add 1 to i giving i
-             call 'mpf_get_d' using numberslist(i) returning j
+             call 'mpf_cmp_si' using numberslist(i) by value 0 returning j
              if j = 0 then
                string z"Error: divide by zero." into c_communication
                string 'F' into passed
