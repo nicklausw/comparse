@@ -216,7 +216,7 @@
            exit section
          end-if
 
-         call 'gmp_sprintf' using c_communication "%Ff" outnumber returning nothing
+         call 'gmp_sprintf' using c_communication "%.3Ff" outnumber returning nothing
          string 'T' into didwefinish
          
          exit program.
