@@ -41,7 +41,12 @@
          01 parenthdata.
            05 parenthnumber usage pointer synchronized.
            05 padding4 pic x(10000).
-         01 didwefinish pic x(1) value 'F' synchronized.
+       01 didwefinish pic x(1) value 'F' synchronized.
+       01 pointers.
+         03 plcounter usage binary-long value 0.
+         03 pointerlist occurs 20000 times.
+           05 pointerdata usage pointer synchronized.
+           05 pointerpadding pic x(10000) synchronized.
      
        linkage section.
          01 c_communication pic x(2000) synchronized.
@@ -52,17 +57,23 @@
          using by reference c_communication, finalnumber.
       *> copy input to where we can work with it piece-by-piece.
          move c_communication to math_string
-         call 'mpf_init' using by reference outnumber returning nothing
          call 'mpf_init' using by reference parenthnumber returning nothing
+         add 1 to plcounter giving plcounter
+         move parenthdata to pointerlist(plcounter)
          string 'F' into building_number
          string 'F' into didwefinish
          move 1 to current_token
+         move 0 to plcounter
 
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into token_type(counter)
            call 'mpf_init' using by reference num(counter) returning nothing
+           add 1 to plcounter giving plcounter
+           move numberslist(counter) to pointerlist(plcounter)
            string ';' into alt_token_type(counter)
            call 'mpf_init' using by reference alt_num(counter) returning nothing
+           add 1 to plcounter giving plcounter
+           move alt_numslist(counter) to pointerlist(plcounter)
          end-perform
 
          perform varying counter from 1 by 1 until counter = 100
@@ -211,20 +222,24 @@
          move numberslist(1) to outdata
 
          call 'calculate'
-         using token_list, outdata, c_communication, didwefinish
+         using token_list, outdata, c_communication, didwefinish, pointers
          if didwefinish <> "T" then
            exit section
          end-if
 
          call 'gmp_sprintf' using c_communication "%.3Ff" outnumber returning nothing
          string 'T' into didwefinish
+
+         perform varying counter from 1 by 1 until counter = plcounter
+           call 'mpf_clear' using by reference pointerlist(counter) returning nothing
+         end-perform
          
          exit program.
 
        parenthLoop.
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into alt_token_type(counter)
-           call 'mpf_init' using by reference alt_num(counter) returning nothing
+           call 'mpf_set_d' using by reference alt_num(counter) by value 0 returning nothing
          end-perform
 
          *> we need the semicolon's position.
@@ -256,7 +271,7 @@
              *> here's where we handle that initial number.
              move alt_numslist(2) to parenthdata
              call 'calculate'
-             using by reference alt_list, parenthdata, c_communication, didwefinish
+             using by reference alt_list, parenthdata, c_communication, didwefinish, pointers
              if didwefinish <> "T" then
                exit section
              end-if

@@ -24,15 +24,25 @@
        01 outdata.
          05 outnumber usage pointer synchronized.
          05 padding3 pic x(10000).
+         
        01 c_communication pic x(2000).
        01 passed pic x(1) value 'F'.
+       
+       01 pointers.
+         03 plcounter usage binary-long value 0.
+         03 pointerlist occurs 20000 times.
+           05 pointerdata usage pointer synchronized.
+           05 pointerpadding pic x(10000) synchronized.
 
        procedure division
-       using by reference token_list, outdata, c_communication, passed.
+               using by reference token_list, outdata, c_communication,
+                                  passed, pointers.
          *> clear variables.
          perform varying i from 1 by 1 until i = 2000
            string ';' into temp_token_type(i)
            call 'mpf_init' using by reference temp_num(i) returning nothing
+           add 1 to plcounter giving plcounter
+           move temp_numslist(i) to pointerlist(plcounter)
          end-perform
          *> first, go through and multiply/divide.
          move 1 to temp_counter
