@@ -48,7 +48,7 @@ void on_message(struct discord *client, const struct discord_message *msg)
   strcat(s, ";");
 
   memcpy(s,&s[7],strlen(s) - 7);
-  mathParse(s,*finalResult);
+  mathParse(s,finalResult);
  
   discord_async_next(client, NULL); // make next request non-blocking (OPTIONAL)
   struct discord_create_message_params params = { .content = s };
