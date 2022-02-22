@@ -27,22 +27,13 @@
          
        01 c_communication pic x(2000).
        01 passed pic x(1) value 'F'.
-       
-       01 pointers.
-         03 plcounter usage binary-long value 0.
-         03 pointerlist occurs 20000 times.
-           05 pointerdata usage pointer synchronized.
-           05 pointerpadding pic x(100) synchronized.
 
        procedure division
-               using by reference token_list, outdata, c_communication,
-                                  passed, pointers.
+               using by reference token_list, outdata, c_communication, passed.
          *> clear variables.
          perform varying i from 1 by 1 until i = 2000
            string ';' into temp_token_type(i)
            call 'mpfr_init2' using by reference temp_num(i) by value 256 returning nothing
-           add 1 to plcounter giving plcounter
-           move temp_numslist(i) to pointerlist(plcounter)
          end-perform
          *> first, go through and multiply/divide.
          move 1 to temp_counter
@@ -53,7 +44,14 @@
              subtract 1 from j giving j
              if token_type(j) <> 'N' then
                string z"Error: Multiple operators in a row." into c_communication
-               exit section
+               string "F" into passed  
+               go to cleanup
+             end-if
+             add 2 to j giving j
+             if token_type(j) <> 'N' then
+               string z"Error: Multiple operators in a row." into c_communication
+               string "F" into passed  
+               go to cleanup
              end-if
            end-if
            if token_type(i) = '+' then
@@ -86,7 +84,7 @@
              if j = 0 then
                string z"Error: divide by zero." into c_communication
                string 'F' into passed
-               exit section
+               go to cleanup
              end-if
              call 'mpfr_div' using outnumber outnumber numberslist(i) by value 0 returning nothing
              exit perform cycle
@@ -114,5 +112,12 @@
              exit perform
            end-if
          end-perform
-         string 'T' into passed
+         string 'T' into passed.
+
+       cleanup.
+         *> clear variables.
+         perform varying i from 1 by 1 until i = 2000
+           call 'mpfr_clear' using by reference temp_num(i) returning nothing
+         end-perform
+         
          exit program.

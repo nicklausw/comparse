@@ -44,11 +44,6 @@
            05 parenthnumber usage pointer synchronized.
            05 padding4 pic x(100).
        01 didwefinish pic x(1) value 'F' synchronized.
-       01 pointers.
-         03 plcounter usage binary-long value 0.
-         03 pointerlist occurs 20000 times.
-           05 pointerdata usage pointer synchronized.
-           05 pointerpadding pic x(100) synchronized.
      
        linkage section.
          01 c_communication pic x(2000) synchronized.
@@ -60,25 +55,16 @@
       *> copy input to where we can work with it piece-by-piece.
          move c_communication to math_string
          call 'mpfr_init2' using by reference parenthnumber by value 256 returning nothing
-         add 1 to plcounter giving plcounter
-         move parenthdata to pointerlist(plcounter)
          call 'mpfr_init2' using by reference outnumber by value 256 returning nothing
-         add 1 to plcounter giving plcounter
-         move outdata to pointerlist(plcounter)
          string 'F' into building_number
          string 'F' into didwefinish
          move 1 to current_token
-         move 0 to plcounter
 
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into token_type(counter)
            call 'mpfr_init2' using by reference num(counter) by value 256 returning nothing
-           add 1 to plcounter giving plcounter
-           move numberslist(counter) to pointerlist(plcounter)
            string ';' into alt_token_type(counter)
            call 'mpfr_init2' using by reference alt_num(counter) by value 256 returning nothing
-           add 1 to plcounter giving plcounter
-           move alt_numslist(counter) to pointerlist(plcounter)
          end-perform
 
          perform varying counter from 1 by 1 until counter = 100
@@ -93,7 +79,7 @@
          end-perform
          if counter = 2000 then
            string z"No semicolon found." into c_communication
-           exit section.
+           go to cleanup.
 
          move 0 to parenthsize
 
@@ -107,7 +93,7 @@
            math_string(counter:1) <> ';' and math_string(counter:1) <> '.' and
            math_string(counter:1) is not numeric then
              string "Bad symbol: " math_string(counter:1) z"." into c_communication
-             exit section
+             go to cleanup
            end-if
            *> if we're still getting a number's contents...
            if building_number = 'F' then
@@ -130,14 +116,14 @@
                  subtract 1 from parenthsize giving parenthsize
                  if parenthsize < 0 then
                    string z"Parenthesis error." into c_communication
-                   exit section
+                   go to cleanup
                  end-if
                  if current_token > 1 then
                    move current_token to j
                    subtract 1 from j
                    if token_type(j) = '(' then
                      string z"Parenthesis error." into c_communication
-                     exit section
+                     go to cleanup
                    end-if
                  end-if
                end-if
@@ -180,14 +166,14 @@
                  subtract 1 from parenthsize giving parenthsize
                  if parenthsize < 0 then
                    string z"Parenthesis error." into c_communication
-                   exit section
+                   go to cleanup
                  end-if
                  if current_token > 1 then
                    move current_token to j
                    subtract 1 from j
                    if token_type(j) = '(' then
                      string z"Parenthesis error." into c_communication
-                     exit section
+                     go to cleanup
                    end-if
                  end-if
                end-if
@@ -214,29 +200,34 @@
 
          if parenthsize <> 0 then
            string z"Parenthesis error." into c_communication
-           exit section.
+           go to cleanup.
 
          move current_token to j
          subtract 1 from j giving j
          if token_type(j) <> 'N' and token_type(j) <> ')' then
            string z"Can't end statement with operator." into c_communication
-           exit section.
+           go to cleanup.
          
          move 1 to j
          if token_type(j) <> 'N' and token_type(j) <> '(' then
            string z"Can't start statement with operator." into c_communication
-           exit section.
+           go to cleanup.
 
      *>  parentheses blocks are trouble. let's resolve them.
          move 0 to foundParentheses
-         perform parenthLoop until foundParentheses = 1
+         string "T" into didwefinish  
+         perform until foundParentheses = 1
+           perform parenthLoop
+           if didwefinish <> "T" then
+             go to cleanup
+           end-if
+         end-perform
 
          call 'mpfr_set' using outdata numberslist(1) by value 0
-
          call 'calculate'
-         using token_list, outdata, c_communication, didwefinish, pointers
+         using token_list, outdata, c_communication, didwefinish
          if didwefinish <> "T" then
-           exit section
+           go to cleanup
          end-if
          
          call 'mpfr_sprintf' using temp_str "%.3Rf" outnumber returning nothing
@@ -277,10 +268,14 @@
              move 0 to i
            end-if
              subtract 1 from alt_pos giving alt_pos
-         end-perform
+         end-perform.
 
-         perform varying counter from 1 by 1 until counter = plcounter
-           call 'mpfr_clear' using by reference pointerlist(counter) returning nothing
+       cleanup.
+         call 'mpfr_clear' using by reference parenthnumber returning nothing
+         call 'mpfr_clear' using by reference outnumber returning nothing
+         perform varying counter from 1 by 1 until counter = 2000
+           call 'mpfr_clear' using by reference numberslist(counter) returning nothing
+           call 'mpfr_clear' using by reference alt_numslist(counter) returning nothing
          end-perform
          
          exit program.
@@ -288,6 +283,7 @@
        parenthLoop.
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into alt_token_type(counter)
+           call 'mpfr_set_d' using by reference alt_numslist(counter) by value 0 0 returning nothing
          end-perform
 
          *> we need the semicolon's position.
@@ -312,21 +308,22 @@
              move 0 to parenthsize
              perform varying j from counter by 1 until j = parenth_pos
                move token_type(j) to alt_token_type(alt_pos)
-               move numberslist(j) to alt_numslist(alt_pos)
+               call 'mpfr_set' using alt_numslist(alt_pos) numberslist(j) by value 0
                add 1 to alt_pos giving alt_pos
                add 1 to parenthsize giving parenthsize
              end-perform
              *> here's where we handle that initial number.
-             move alt_numslist(2) to parenthdata
+             call 'mpfr_set' using parenthdata alt_numslist(2) by value 0
              call 'calculate'
-             using by reference alt_list, parenthdata, c_communication, didwefinish, pointers
+             using by reference alt_list, parenthdata, c_communication, didwefinish
              if didwefinish <> "T" then
+               move 0 to foundParentheses
                exit section
              end-if
              *> this puts the counter back on the start parenthesis.
              subtract 1 from counter giving counter
              *> replace start parenthesis with evaluated number.
-             move parenthdata to numberslist(counter)
+             call 'mpfr_set' using numberslist(counter) parenthdata by value 0
              string 'N' into token_type(counter)
              move counter to j
              add parenthsize to j giving j
@@ -335,7 +332,7 @@
              *> counter is at dest, j is at src.
              perform varying j from j by 1 until token_type(j) = ';'
                move token_type(j) to token_type(counter)
-               move numberslist(j) to numberslist(counter)
+               call 'mpfr_set' using numberslist(counter) numberslist(j) by value 0
                add 1 to counter giving counter
              end-perform
 
