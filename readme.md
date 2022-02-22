@@ -1,6 +1,8 @@
 # comparse: CObol Math PARSE
 This is a math parser written in gnuCOBOL for fun. It interfaces with the [Concord library](https://github.com/Cogmasters/concord/tree/dev) to take in statements via Discord, and uses [MPFR](https://www.mpfr.org/) for arbitrary precision (AKA giant numbers).
 
+![Demonstration](demonstration.jpg)
+
 ## why?
 To satisfy my own curiosity, and hopefully yours aswell. Writing a math parser is easy; writing one in a language based around tons of random keywords that the entire industry gave up on is a different story. Want to hire me to work on your COBOL project? I'd love to help! [Hit me up.](https://www.nicklausw.com/contact)
 
