@@ -1,5 +1,5 @@
 #include <concord/discord.h>
-#include <gmp.h>
+#include <mpfr.h>
 #include <libcob.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-extern void *mathParse(char*,mpf_t*);
+extern void *mathParse(char*,mpfr_t*);
 
 bool startsWith(char *a, char *b)
 {
@@ -29,7 +29,7 @@ void on_ready(struct discord *client)
 void on_message(struct discord *client, const struct discord_message *msg)
 {
   if (msg->author->bot) return;
-  mpf_t *finalResult = malloc(200000);
+  mpfr_t *finalResult = malloc(100);
   char *s = malloc(2000);
 
   // make sure input has no garbage.

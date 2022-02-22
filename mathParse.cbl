@@ -27,37 +27,37 @@
            03 token_type pic x(1) value ';' synchronized occurs 2000 times.
            03 numberslist occurs 2000 times.
              05 num usage pointer synchronized.
-             05 padding1 pic x(10000) synchronized.
+             05 padding1 pic x(100) synchronized.
 
          01 alt_list.
            03 alt_token_type pic x(1) value ';' synchronized occurs 2000 times.
            03 alt_numslist occurs 2000 times.
              05 alt_num usage pointer synchronized.
-             05 padding5 pic x(10000) synchronized.
+             05 padding5 pic x(100) synchronized.
            
          01 outdata.
            05 outnumber usage pointer synchronized.
-           05 padding3 pic x(10000).
+           05 padding3 pic x(100).
          01 parenthdata.
            05 parenthnumber usage pointer synchronized.
-           05 padding4 pic x(10000).
+           05 padding4 pic x(100).
        01 didwefinish pic x(1) value 'F' synchronized.
        01 pointers.
          03 plcounter usage binary-long value 0.
          03 pointerlist occurs 20000 times.
            05 pointerdata usage pointer synchronized.
-           05 pointerpadding pic x(10000) synchronized.
+           05 pointerpadding pic x(100) synchronized.
      
        linkage section.
          01 c_communication pic x(2000) synchronized.
          01 finalnumber usage pointer synchronized.
-         01 finalpadding pic x(10000).
+         01 finalpadding pic x(100).
      
        procedure division
          using by reference c_communication, finalnumber.
       *> copy input to where we can work with it piece-by-piece.
          move c_communication to math_string
-         call 'mpf_init' using by reference parenthnumber returning nothing
+         call 'mpfr_init2' using by reference parenthnumber by value 256 returning nothing
          add 1 to plcounter giving plcounter
          move parenthdata to pointerlist(plcounter)
          string 'F' into building_number
@@ -67,11 +67,11 @@
 
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into token_type(counter)
-           call 'mpf_init' using by reference num(counter) returning nothing
+           call 'mpfr_init2' using by reference num(counter) by value 256 returning nothing
            add 1 to plcounter giving plcounter
            move numberslist(counter) to pointerlist(plcounter)
            string ';' into alt_token_type(counter)
-           call 'mpf_init' using by reference alt_num(counter) returning nothing
+           call 'mpfr_init2' using by reference alt_num(counter) by value 256 returning nothing
            add 1 to plcounter giving plcounter
            move alt_numslist(counter) to pointerlist(plcounter)
          end-perform
@@ -157,7 +157,7 @@
                subtract 1 from building_offset
                    giving building_offset
                string building_space(1:building_offset) x'00' into temp_str
-               call 'mpf_set_str' using num(current_token) temp_str by value 10 returning nothing
+               call 'mpfr_set_str' using num(current_token) temp_str by value 10 0 returning nothing
                add 1 to current_token giving current_token
                move math_string(counter:1) to token_type(current_token)
                if token_type(current_token) = ';' then
@@ -226,12 +226,11 @@
          if didwefinish <> "T" then
            exit section
          end-if
-
-         call 'gmp_sprintf' using c_communication "%.3Ff" outnumber returning nothing
+         call 'mpfr_sprintf' using c_communication "%.3Rf" outnumber returning nothing
          string 'T' into didwefinish
 
          perform varying counter from 1 by 1 until counter = plcounter
-           call 'mpf_clear' using by reference pointerlist(counter) returning nothing
+           call 'mpfr_clear' using by reference pointerlist(counter) returning nothing
          end-perform
          
          exit program.
@@ -239,7 +238,7 @@
        parenthLoop.
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into alt_token_type(counter)
-           call 'mpf_set_d' using by reference alt_num(counter) by value 0 returning nothing
+           call 'mpfr_set_d' using by reference alt_num(counter) by value 0 0 returning nothing
          end-perform
 
          *> we need the semicolon's position.

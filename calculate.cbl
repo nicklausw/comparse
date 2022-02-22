@@ -13,17 +13,17 @@
            03 temp_token_type pic x(1) synchronized occurs 2000 times.
            03 temp_numslist occurs 2000 times.
              05 temp_num usage pointer synchronized.
-             05 padding5 pic x(10000) synchronized.
+             05 padding5 pic x(100) synchronized.
        linkage section.
          01 token_list.
            03 token_type pic x(1) value ';' synchronized occurs 2000 times.
            03 numberslist occurs 2000 times.
              05 num usage pointer synchronized.
-             05 padding1 pic x(10000) synchronized.
+             05 padding1 pic x(100) synchronized.
 
        01 outdata.
          05 outnumber usage pointer synchronized.
-         05 padding3 pic x(10000).
+         05 padding3 pic x(100).
          
        01 c_communication pic x(2000).
        01 passed pic x(1) value 'F'.
@@ -32,7 +32,7 @@
          03 plcounter usage binary-long value 0.
          03 pointerlist occurs 20000 times.
            05 pointerdata usage pointer synchronized.
-           05 pointerpadding pic x(10000) synchronized.
+           05 pointerpadding pic x(100) synchronized.
 
        procedure division
                using by reference token_list, outdata, c_communication,
@@ -40,7 +40,7 @@
          *> clear variables.
          perform varying i from 1 by 1 until i = 2000
            string ';' into temp_token_type(i)
-           call 'mpf_init' using by reference temp_num(i) returning nothing
+           call 'mpfr_init2' using by reference temp_num(i) by value 256 returning nothing
            add 1 to plcounter giving plcounter
            move temp_numslist(i) to pointerlist(plcounter)
          end-perform
@@ -78,17 +78,17 @@
              exit perform cycle
            else if token_type(i) = '*' then
              add 1 to i giving i
-             call 'mpf_mul' using outnumber outnumber numberslist(i) returning nothing
+             call 'mpfr_mul' using outnumber outnumber numberslist(i) by value 0 returning nothing
              exit perform cycle
            else if token_type(i) = '/' then
              add 1 to i giving i
-             call 'mpf_cmp_si' using numberslist(i) by value 0 returning j
+             call 'mpfr_cmp_si' using numberslist(i) by value 0 returning j
              if j = 0 then
                string z"Error: divide by zero." into c_communication
                string 'F' into passed
                exit section
              end-if
-             call 'mpf_div' using outnumber outnumber numberslist(i) returning nothing
+             call 'mpfr_div' using outnumber outnumber numberslist(i) by value 0 returning nothing
              exit perform cycle
            else if token_type(i) = ';' then
              exit perform
@@ -104,11 +104,11 @@
           perform varying i from 2 by 1 until temp_token_type(i) = ';'
            if temp_token_type(i) = '+' then
              add 1 to i giving i
-             call 'mpf_add' using outnumber outnumber temp_numslist(i) returning nothing
+             call 'mpfr_add' using outnumber outnumber temp_numslist(i) by value 0 returning nothing
              exit perform cycle
            else if temp_token_type(i) = '-' then
              add 1 to i giving i
-             call 'mpf_sub' using outnumber outnumber temp_numslist(i) returning nothing
+             call 'mpfr_sub' using outnumber outnumber temp_numslist(i) by value 0 returning nothing
              exit perform cycle
            else if temp_token_type(i) = ';' then
              exit perform
