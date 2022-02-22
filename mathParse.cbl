@@ -285,7 +285,6 @@
        parenthLoop.
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into alt_token_type(counter)
-           call 'mpfr_set_d' using by reference alt_num(counter) by value 0 0 returning nothing
          end-perform
 
          *> we need the semicolon's position.
