@@ -13,7 +13,9 @@
          01 parenthsize usage binary-long value 0.
          01 alt_pos usage binary-long value 0.
          01 endbound usage binary-long value 0.
+         01 i usage binary-long value 0.
          01 j usage binary-long value 0.
+         01 commas usage binary-long value 0.
 
          01 building_number pic x(1) value 'F'.
          01 building_offset usage binary-long value 0.
@@ -94,10 +96,17 @@
 
       *>first: split into tokens.
          perform varying counter from 1 by 1 until counter = 2000
-      *>if we're still getting a number's contents...
-           if math_string(counter:1) = ' ' then
+           if math_string(counter:1) = ' ' or math_string(counter:1) = ',' then
              exit perform cycle
+           else if math_string(counter:1) <> '*' and math_string(counter:1) <> '/' and
+           math_string(counter:1) <> '+' and math_string(counter:1) <> '-' and
+           math_string(counter:1) <> '(' and math_string(counter:1) <> ')' and
+           math_string(counter:1) <> ';' and math_string(counter:1) <> '.' and
+           math_string(counter:1) is not numeric then
+             string "Bad symbol: " math_string(counter:1) z"." into c_communication
+             exit section
            end-if
+           *> if we're still getting a number's contents...
            if building_number = 'F' then
              if (math_string(counter:1) is numeric) or
               (math_string(counter:1) = '.') then
@@ -226,8 +235,46 @@
          if didwefinish <> "T" then
            exit section
          end-if
-         call 'mpfr_sprintf' using c_communication "%.3Rf" outnumber returning nothing
+         
+         call 'mpfr_sprintf' using temp_str "%.3Rf" outnumber returning nothing
          string 'T' into didwefinish
+
+
+         *> get string length first.
+         move 1 to j
+         perform until temp_str(j:1) = x'00'
+           add 1 to j giving j
+         end-perform
+         
+         *> subtract ".xxx" and a digit
+         subtract 6 from j giving j
+         divide j by 3 giving i
+         move i to commas
+         add i to j giving j
+         add 6 to j giving j
+         *> we now have the new string's length
+         string x'00' into c_communication(j:1)
+         subtract 4 from j giving j
+         subtract i from j giving i
+         move temp_str(i:4) to c_communication(j:4)
+         subtract 1 from j giving j
+         move 0 to i
+         move j to alt_pos
+         subtract commas from alt_pos giving alt_pos
+
+         *> now copy over the numbers with commas inbetween.
+         perform varying counter from j by -1 until counter = 0
+           move temp_str(alt_pos:1) to c_communication(counter:1)
+           if counter <> 1 then  
+             add 1 to i giving i
+           end-if
+           if i = 3 then
+             subtract 1 from counter giving counter
+             string ',' into c_communication(counter:1)
+             move 0 to i
+           end-if
+             subtract 1 from alt_pos giving alt_pos
+         end-perform
 
          perform varying counter from 1 by 1 until counter = plcounter
            call 'mpfr_clear' using by reference pointerlist(counter) returning nothing
