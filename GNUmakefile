@@ -10,7 +10,7 @@ flags := -O2 -Wall
 cblflags := -Wno-others
 
 main: $(ofiles)
-	gcc $(flags) -o main $(ofiles) -pthread -lmpfr -lgmp -lcob -ldiscord -lcurl
+	cobc $(flags) -x -o main $(ofiles) -lpthread -lmpfr -lgmp -lcob -ldiscord -lcurl
 
 %.o: %.c
 	gcc $(flags) -c $< -o $@
