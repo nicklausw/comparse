@@ -57,24 +57,24 @@
              end-if
            end-if
            if token_type(i) = '+' then
-             move outdata to temp_numslist(temp_counter)
+             call 'mpfr_set' using temp_numslist(temp_counter) outdata by value 0
              string 'N' into temp_token_type(temp_counter)
              add 1 to temp_counter giving temp_counter
              string '+' into temp_token_type(temp_counter)
              add 1 to temp_counter giving temp_counter
              string 'N' into temp_token_type(temp_counter)
              add 1 to i giving i
-             move numberslist(i) to outdata
+             call 'mpfr_set' using outdata numberslist(i) by value 0
              exit perform cycle
            else if token_type(i) = '-' then
-             move outdata to temp_numslist(temp_counter)
+             call 'mpfr_set' using temp_numslist(temp_counter) outdata by value 0
              string 'N' into temp_token_type(temp_counter)
              add 1 to temp_counter giving temp_counter
              string '-' into temp_token_type(temp_counter)
              add 1 to temp_counter giving temp_counter
              string 'N' into temp_token_type(temp_counter)
              add 1 to i giving i
-             move numberslist(i) to outdata
+             call 'mpfr_set' using outdata numberslist(i) by value 0
              exit perform cycle
            else if token_type(i) = '*' then
              add 1 to i giving i
@@ -95,12 +95,12 @@
            end-if
          end-perform
 
-         move outdata to temp_numslist(temp_counter)
+         call 'mpfr_set' using temp_numslist(temp_counter) outdata by value 0
          string 'N' into temp_token_type(temp_counter)
          add 1 to temp_counter giving temp_counter
          string ';' into temp_token_type(temp_counter)
          *> now for addition and subtraction.
-         move temp_numslist(1) to outdata
+         call 'mpfr_set' using  outdata temp_numslist(1) by value 0
           perform varying i from 2 by 1 until temp_token_type(i) = ';'
            if temp_token_type(i) = '+' then
              add 1 to i giving i

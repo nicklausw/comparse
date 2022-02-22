@@ -62,6 +62,9 @@
          call 'mpfr_init2' using by reference parenthnumber by value 256 returning nothing
          add 1 to plcounter giving plcounter
          move parenthdata to pointerlist(plcounter)
+         call 'mpfr_init2' using by reference outnumber by value 256 returning nothing
+         add 1 to plcounter giving plcounter
+         move outdata to pointerlist(plcounter)
          string 'F' into building_number
          string 'F' into didwefinish
          move 1 to current_token
@@ -228,7 +231,7 @@
          move 0 to foundParentheses
          perform parenthLoop until foundParentheses = 1
 
-         move numberslist(1) to outdata
+         call 'mpfr_set' using outdata numberslist(1) by value 0
 
          call 'calculate'
          using token_list, outdata, c_communication, didwefinish, pointers
