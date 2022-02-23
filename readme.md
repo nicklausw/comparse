@@ -7,7 +7,7 @@ This is a math parser written in gnuCOBOL for fun. It interfaces with the [Conco
 To satisfy my own curiosity, and hopefully yours aswell. Writing a math parser is easy; writing one in a language based around tons of random keywords that the entire industry gave up on is a different story. Want to hire me to work on your COBOL project? I'd love to help! [Hit me up.](https://www.nicklausw.com/contact)
 
 ## what's with the bit precision?
-Comparse can display up to 1498 digits in a message due to commas and the decimal place. By the reasoning of this StackOverflow post, 1498 digits can be any of 10^1498 different numbers. x bits can represent 2^x different numbers. So you solve:
+Comparse can display up to 1498 digits in a message due to commas and the decimal place. 1498 digits can be any of 10^1498 different numbers. x bits can represent 2^x different numbers. So you solve:
 ```
 2^x = 10^1498
 x = log2(10^1498)

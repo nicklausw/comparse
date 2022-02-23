@@ -69,10 +69,11 @@ int main(int argc, char **argv)
   }
   
   struct discord *client = discord_init(argv[1]);
-  discord_set_prefix(client,"/");
   discord_set_on_ready(client, &on_ready);
   discord_set_on_command(client, "domath", &do_math);
+  discord_set_on_command(client, "DoMath", &do_math);
   discord_set_on_command(client, "testmath", &test_math);
+  discord_set_on_command(client, "TestMath", &test_math);
   discord_run(client);
   return 0;
 }
