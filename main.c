@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-extern void *mathParse(char*,mpfr_t*);
+extern void *mathParse(char*);
 
 bool startsWith(char *a, char *b)
 {
@@ -26,10 +26,25 @@ void on_ready(struct discord *client)
   log_info("Logged in as %s!", bot->username);
 }
 
-void on_message(struct discord *client, const struct discord_message *msg)
+void test_math(struct discord *client, const struct discord_message *msg) {
+  int precision = atoi(msg->content);
+  char numberstring[] = "9999999999999999999999999999999999999999999999999999999";
+  mpfr_t num, othernum;
+  mpfr_init2(num, precision);
+  mpfr_init2(othernum, precision);
+  mpfr_set_str(num, numberstring, 10, 0);
+  mpfr_set_str(othernum, numberstring, 10, 0);
+  for(int i = 0; i < 10; i++) {
+    mpfr_mul(num, num, othernum, 0);
+  }
+  mpfr_printf("PRECISION: %d\n\n%R.3f\n\n",precision,num);
+  mpfr_clear(num);
+  mpfr_clear(othernum);
+}
+
+void do_math(struct discord *client, const struct discord_message *msg)
 {
   if (msg->author->bot) return;
-  mpfr_t *finalResult = malloc(100);
   char *s = malloc(2000);
 
   // make sure input has no garbage.
@@ -38,22 +53,13 @@ void on_message(struct discord *client, const struct discord_message *msg)
   }
   strcpy(s, msg->content);
 
-  if(strlen(s) < strlen("domath ") + 1) {
-    return;
-  }
-  if(!startsWith(s, "domath ")) {
-    return;
-  }
   // append a semicolon so you don't have to.
   strcat(s, ";");
-
-  memcpy(s,&s[7],strlen(s) - 7);
-  mathParse(s,finalResult);
+  mathParse(s);
  
   discord_async_next(client, NULL); // make next request non-blocking (OPTIONAL)
   struct discord_create_message_params params = { .content = s };
   discord_create_message(client, msg->channel_id, &params, NULL);
-  
 }
 
 int main(int argc, char **argv)
@@ -64,8 +70,10 @@ int main(int argc, char **argv)
   }
   
   struct discord *client = discord_init(argv[1]);
+  discord_set_prefix(client,"/");
   discord_set_on_ready(client, &on_ready);
-  discord_set_on_message_create(client, &on_message);
+  discord_set_on_command(client, "domath", &do_math);
+  discord_set_on_command(client, "testmath", &test_math);
   discord_run(client);
   return 0;
 }

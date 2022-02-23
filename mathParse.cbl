@@ -4,9 +4,8 @@
      
        data division.
        working-storage section.
-      *>  believe it or not, finding variable names in a language
-      *>  based on English is freaking impossible.
-         01 temp_str pic x(2000).
+      *>  temp_str is giant to make sure the message fits 2000 chars.
+         01 temp_str pic x(200000).
          01 math_string pic x(2000).
          01 foundParentheses usage binary-long value 1.
          01 counter usage binary-long value 0.
@@ -19,7 +18,7 @@
 
          01 building_number pic x(1) value 'F'.
          01 building_offset usage binary-long value 0.
-         01 building_space pic x(100) value zeroes.
+         01 building_space pic x(2000) value zeroes.
 
          01 parenth_pos usage binary-long.
 
@@ -29,42 +28,40 @@
            03 token_type pic x(1) value ';' synchronized occurs 2000 times.
            03 numberslist occurs 2000 times.
              05 num usage pointer synchronized.
-             05 padding1 pic x(100) synchronized.
+             05 padding1 pic x(750) synchronized.
 
          01 alt_list.
            03 alt_token_type pic x(1) value ';' synchronized occurs 2000 times.
            03 alt_numslist occurs 2000 times.
              05 alt_num usage pointer synchronized.
-             05 padding5 pic x(100) synchronized.
+             05 padding5 pic x(750) synchronized.
            
          01 outdata.
            05 outnumber usage pointer synchronized.
-           05 padding3 pic x(100).
+           05 padding3 pic x(750).
          01 parenthdata.
            05 parenthnumber usage pointer synchronized.
-           05 padding4 pic x(100).
+           05 padding4 pic x(750).
        01 didwefinish pic x(1) value 'F' synchronized.
      
        linkage section.
          01 c_communication pic x(2000) synchronized.
-         01 finalnumber usage pointer synchronized.
-         01 finalpadding pic x(100).
      
        procedure division
-         using by reference c_communication, finalnumber.
+         using by reference c_communication.
       *> copy input to where we can work with it piece-by-piece.
          move c_communication to math_string
-         call 'mpfr_init2' using by reference parenthnumber by value 256 returning nothing
-         call 'mpfr_init2' using by reference outnumber by value 256 returning nothing
+         call 'mpfr_init2' using by reference parenthnumber by value 4984 returning nothing
+         call 'mpfr_init2' using by reference outnumber by value 4984 returning nothing
          string 'F' into building_number
          string 'F' into didwefinish
          move 1 to current_token
 
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into token_type(counter)
-           call 'mpfr_init2' using by reference num(counter) by value 256 returning nothing
+           call 'mpfr_init2' using by reference num(counter) by value 4984 returning nothing
            string ';' into alt_token_type(counter)
-           call 'mpfr_init2' using by reference alt_num(counter) by value 256 returning nothing
+           call 'mpfr_init2' using by reference alt_num(counter) by value 4984 returning nothing
          end-perform
 
          perform varying counter from 1 by 1 until counter = 100
@@ -246,6 +243,11 @@
          move i to commas
          add i to j giving j
          add 6 to j giving j
+         if j > 2001 then
+           string z"Error: result can't fit in message." into c_communication
+           go to cleanup
+         end-if
+           
          *> we now have the new string's length
          string x'00' into c_communication(j:1)
          subtract 4 from j giving j

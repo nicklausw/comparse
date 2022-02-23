@@ -13,17 +13,17 @@
            03 temp_token_type pic x(1) synchronized occurs 2000 times.
            03 temp_numslist occurs 2000 times.
              05 temp_num usage pointer synchronized.
-             05 padding5 pic x(100) synchronized.
+             05 padding5 pic x(750) synchronized.
        linkage section.
          01 token_list.
            03 token_type pic x(1) value ';' synchronized occurs 2000 times.
            03 numberslist occurs 2000 times.
              05 num usage pointer synchronized.
-             05 padding1 pic x(100) synchronized.
+             05 padding1 pic x(750) synchronized.
 
        01 outdata.
          05 outnumber usage pointer synchronized.
-         05 padding3 pic x(100).
+         05 padding3 pic x(750).
          
        01 c_communication pic x(2000).
        01 passed pic x(1) value 'F'.
@@ -33,7 +33,7 @@
          *> clear variables.
          perform varying i from 1 by 1 until i = 2000
            string ';' into temp_token_type(i)
-           call 'mpfr_init2' using by reference temp_num(i) by value 256 returning nothing
+           call 'mpfr_init2' using by reference temp_num(i) by value 4984 returning nothing
          end-perform
          *> first, go through and multiply/divide.
          move 1 to temp_counter
