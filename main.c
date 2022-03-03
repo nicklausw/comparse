@@ -59,6 +59,7 @@ void do_math(struct discord *client, const struct discord_message *msg)
 
   struct discord_create_message params = { .content = s };
   discord_create_message(client, msg->channel_id, &params, NULL);
+  free(s);
 }
 
 int main(int argc, char **argv)
