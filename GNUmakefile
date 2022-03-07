@@ -13,7 +13,7 @@ comparse: $(ofiles)
 	cobc $(flags) -x -o comparse $(ofiles) -lmpfr -lgmp -lcob -ldiscord -lcurl -lpthread
 
 %.o: %.c
-	gcc $(flags) -c $< -o $@
+	$(CC) $(flags) -c $< -o $@
 %.o: %.cbl
 	cobc $(flags) $(cblflags) -Wall -F -fimplicit-init -fstatic-call -c $< -o $@
 
