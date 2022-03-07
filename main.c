@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-extern void *mathParse(char*);
+extern void mathParse(char*);
 
 void on_ready(struct discord *client) 
 {
