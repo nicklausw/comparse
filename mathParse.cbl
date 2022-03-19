@@ -25,13 +25,13 @@
          01 current_token usage binary-long value 1.
 
          01 token_list.
-           03 token_type pic x(1) value ';' synchronized occurs 2000 times.
+           03 token_type pic x(1) synchronized occurs 2000 times.
            03 numberslist occurs 2000 times.
              05 num usage pointer synchronized.
              05 padding1 pic x(750) synchronized.
 
          01 alt_list.
-           03 alt_token_type pic x(1) value ';' synchronized occurs 2000 times.
+           03 alt_token_type pic x(1) synchronized occurs 2000 times.
            03 alt_numslist occurs 2000 times.
              05 alt_num usage pointer synchronized.
              05 padding5 pic x(750) synchronized.
