@@ -47,21 +47,20 @@
        linkage section.
          01 c_communication pic x(2000) synchronized.
      
-       procedure division
-         using by reference c_communication.
+       procedure division using c_communication.
       *> copy input to where we can work with it piece-by-piece.
          move c_communication to math_string
-         call 'mpfr_init2' using by reference parenthnumber by value 4984
-         call 'mpfr_init2' using by reference outnumber by value 4984
+         call 'mpfr_init2' using parenthnumber, by value 4984
+         call 'mpfr_init2' using outnumber, by value 4984
          string 'F' into building_number
          string 'F' into didwefinish
          move 1 to current_token
 
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into token_type(counter)
-           call 'mpfr_init2' using by reference num(counter) by value 4984
+           call 'mpfr_init2' using num(counter), by value 4984
            string ';' into alt_token_type(counter)
-           call 'mpfr_init2' using by reference alt_num(counter) by value 4984
+           call 'mpfr_init2' using alt_num(counter), by value 4984
          end-perform
 
          perform varying counter from 1 by 1 until counter = 100
@@ -151,7 +150,7 @@
                string 'F' into building_number
                subtract 1 from building_offset
                string building_space(1:building_offset) x'00' into temp_str
-               call 'mpfr_set_str' using num(current_token) temp_str by value 10 0
+               call 'mpfr_set_str' using num(current_token), temp_str, by value 10, 0
                add 1 to current_token
                move math_string(counter:1) to token_type(current_token)
                if token_type(current_token) = ';' then
@@ -219,14 +218,14 @@
            end-if
          end-perform
 
-         call 'mpfr_set' using outdata numberslist(1) by value 0
+         call 'mpfr_set' using outdata, numberslist(1), by value 0
          call 'calculate'
          using token_list, outdata, c_communication, didwefinish
          if didwefinish <> "T" then
            go to cleanup
          end-if
          
-         call 'mpfr_sprintf' using temp_str "%.3Rf" outnumber
+         call 'mpfr_sprintf' using temp_str, "%.3Rf", outnumber
          string 'T' into didwefinish
 
 
@@ -272,11 +271,11 @@
          end-perform.
 
        cleanup.
-         call 'mpfr_clear' using by reference parenthnumber
-         call 'mpfr_clear' using by reference outnumber
+         call 'mpfr_clear' using parenthnumber
+         call 'mpfr_clear' using outnumber
          perform varying counter from 1 by 1 until counter = 2000
-           call 'mpfr_clear' using by reference numberslist(counter)
-           call 'mpfr_clear' using by reference alt_numslist(counter)
+           call 'mpfr_clear' using numberslist(counter)
+           call 'mpfr_clear' using alt_numslist(counter)
          end-perform
          
          exit program.
@@ -284,7 +283,7 @@
        parenthLoop.
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into alt_token_type(counter)
-           call 'mpfr_set_d' using by reference alt_numslist(counter) by value 0 0
+           call 'mpfr_set_d' using alt_numslist(counter), by value 0, 0
          end-perform
 
          *> we need the semicolon's position.
@@ -309,14 +308,14 @@
              move 0 to parenthsize
              perform varying j from counter by 1 until j = parenth_pos
                move token_type(j) to alt_token_type(alt_pos)
-               call 'mpfr_set' using alt_numslist(alt_pos) numberslist(j) by value 0
+               call 'mpfr_set' using alt_numslist(alt_pos), numberslist(j), by value 0
                add 1 to alt_pos
                add 1 to parenthsize
              end-perform
              *> here's where we handle that initial number.
-             call 'mpfr_set' using parenthdata alt_numslist(2) by value 0
+             call 'mpfr_set' using parenthdata, alt_numslist(2), by value 0
              call 'calculate'
-             using by reference alt_list, parenthdata, c_communication, didwefinish
+             using alt_list, parenthdata, c_communication, didwefinish
              if didwefinish <> "T" then
                move 0 to foundParentheses
                exit section
@@ -324,7 +323,7 @@
              *> this puts the counter back on the start parenthesis.
              subtract 1 from counter
              *> replace start parenthesis with evaluated number.
-             call 'mpfr_set' using numberslist(counter) parenthdata by value 0
+             call 'mpfr_set' using numberslist(counter), parenthdata, by value 0
              string 'N' into token_type(counter)
              move counter to j
              add parenthsize to j
@@ -333,7 +332,7 @@
              *> counter is at dest, j is at src.
              perform varying j from j by 1 until token_type(j) = ';'
                move token_type(j) to token_type(counter)
-               call 'mpfr_set' using numberslist(counter) numberslist(j) by value 0
+               call 'mpfr_set' using numberslist(counter), numberslist(j), by value 0
                add 1 to counter
              end-perform
 
