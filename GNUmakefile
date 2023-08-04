@@ -1,11 +1,11 @@
 cblfiles := math_parse.cbl calculate.cbl
 cfiles := main.c
-ofiles := $(subst .c,.o,$(subst .cbl,.o,$(cblfiles) $(cfiles)))
+ofiles := $(cblfiles:.cbl=.o) $(cfiles:.c=.o)
 # files only made with -g
-gfiles := $(subst .cbl,.c,$(cblfiles)) \
-	  $(subst .cbl,.c.l.h,$(cblfiles)) \
-	  $(subst .cbl,.c.h,$(cblfiles)) \
-	  $(subst .cbl,.i,$(cblfiles))
+gfiles := $(cblfiles:.cbl=.c) \
+		  $(cblfiles:.cbl=.c.l.h) \
+		  $(cblfiles:.cbl=.c.h) \
+		  $(cblfiles:.cbl=.i)
 flags := -O2 -Wall
 cblflags := -Wno-others
 
