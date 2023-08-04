@@ -21,15 +21,15 @@ void on_ready(struct discord *client, const struct discord_ready *event) {
 void on_message(struct discord *client, const struct discord_message *msg) {
   if (msg->author->bot) return;
 
-  if(!starts_with(msg->content, "/domath ") || strlen(msg->content) <= 8) {
+  if(!starts_with(msg->content, "domath ") || strlen(msg->content) <= 7) {
     return;
   }
 
-  // subtract space taken by "/domath " but let us add a semicolon if needed
+  // subtract space taken by "domath " but let us add a semicolon if needed
   // discord messages can be up to 2000 chars long
-  char *s = calloc(2000 - 8 + 1, 1);
+  char *s = calloc(2000 - 7 + 1, 1);
 
-  strcpy(s, msg->content + 8);
+  strcpy(s, msg->content + 7);
 
   // append a semicolon so you don't have to.
   // this is the end-of-statement marker for the cobol
