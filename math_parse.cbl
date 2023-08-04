@@ -7,11 +7,10 @@
       *>  temp_str is giant to make sure the message fits 2000 chars.
          01 temp_str pic x(200000).
          01 math_string pic x(2000).
-         01 foundParentheses usage binary-long value 1.
+         01 found_parentheses usage binary-long value 1.
          01 counter usage binary-long value 0.
          01 parenthsize usage binary-long value 0.
          01 alt_pos usage binary-long value 0.
-         01 endbound usage binary-long value 0.
          01 i usage binary-long value 0.
          01 j usage binary-long value 0.
          01 commas usage binary-long value 0.
@@ -20,8 +19,6 @@
          01 building_offset usage binary-long value 0.
          01 building_space pic x(2000) value zeroes.
 
-         01 parenth_pos usage binary-long.
-
          01 current_token usage binary-long value 1.
 
          01 token_list.
@@ -29,14 +26,14 @@
            03 numberslist occurs 2000 times.
              05 num usage pointer synchronized.
              05 padding1 pic x(32) synchronized.
+           
+         01 didwefinish pic x(1) value 'F' synchronized.
 
          01 alt_list.
-           03 alt_token_type pic x(1) synchronized occurs 2000 times.
-           03 alt_numslist occurs 2000 times.
-             05 alt_num usage pointer synchronized.
-             05 padding5 pic x(32) synchronized.
-           
-       01 didwefinish pic x(1) value 'F' synchronized.
+             03 alt_token_type pic x(1) synchronized occurs 2000 times.
+             03 alt_numslist occurs 2000 times.
+               05 alt_num usage pointer synchronized.
+               05 padding5 pic x(32) synchronized.
      
        linkage section.
          01 c_communication pic x(2000) synchronized.
@@ -202,10 +199,11 @@
            go to cleanup.
 
      *>  parentheses blocks are trouble. let's resolve them.
-         move 0 to foundParentheses
-         string "T" into didwefinish  
-         perform until foundParentheses = 1
-           perform parenthLoop
+         move 0 to found_parentheses
+         string "T" into didwefinish
+         perform until found_parentheses = 1
+           call 'reduce_parentheses' using alt_list, token_list,
+           didwefinish, found_parentheses, c_communication
            if didwefinish <> "T" then
              go to cleanup
            end-if
@@ -269,65 +267,3 @@
          end-perform
          
          exit program.
-
-       parenthLoop.
-         perform varying counter from 1 by 1 until counter = 2000
-           string ';' into alt_token_type(counter)
-           call 'mpfr_set_d' using alt_numslist(counter), by value 0, 0
-         end-perform
-
-         *> we need the semicolon's position.
-         perform varying counter from 1 by 1 until counter = 2000
-           if token_type(counter) = ';' then
-             exit perform
-           end-if
-         end-perform
-         move counter to endbound
-           
-         perform varying counter from endbound by -1 until counter = 0
-           move 1 to foundParentheses
-           if token_type(counter) = ')' then
-             move counter to parenth_pos
-           end-if
-           if token_type(counter) = '(' then
-             *> say we have a statement: (N+(N*N));
-             *> adding 1 to counter focuses on the second N. we're going backwards.
-             add 1 to counter
-             *> token indexing technically starts at 2 (1 is initial number).
-             move 2 to alt_pos
-             move 0 to parenthsize
-             perform varying j from counter by 1 until j = parenth_pos
-               move token_type(j) to alt_token_type(alt_pos)
-               call 'mpfr_set' using alt_numslist(alt_pos), numberslist(j), by value 0
-               add 1 to alt_pos
-               add 1 to parenthsize
-             end-perform
-             *> here's where we handle that initial number.
-             call 'calculate'
-             using alt_list, c_communication, didwefinish
-             if didwefinish <> "T" then
-               move 0 to foundParentheses
-               exit section
-             end-if
-             *> this puts the counter back on the start parenthesis.
-             subtract 1 from counter
-             *> replace start parenthesis with evaluated number.
-             call 'mpfr_set' using numberslist(counter), alt_numslist(2), by value 0
-             string 'N' into token_type(counter)
-             move counter to j
-             add parenthsize to j
-             add 2 to j
-             add 1 to counter
-             *> counter is at dest, j is at src.
-             perform varying j from j by 1 until token_type(j) = ';'
-               move token_type(j) to token_type(counter)
-               call 'mpfr_set' using numberslist(counter), numberslist(j), by value 0
-               add 1 to counter
-             end-perform
-
-             string ';' into token_type(counter)
-                 
-             move 0 to foundParentheses
-             exit perform
-           end-if
-         end-perform.

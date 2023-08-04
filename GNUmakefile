@@ -1,4 +1,4 @@
-cblfiles := math_parse.cbl calculate.cbl slide_back.cbl
+cblfiles := math_parse.cbl calculate.cbl slide_back.cbl reduce_parentheses.cbl
 cfiles := main.c
 ofiles := $(cblfiles:.cbl=.o) $(cfiles:.c=.o)
 # files only made with -g
