@@ -13,7 +13,7 @@
            03 token_type pic x(1) value ';' synchronized occurs 2000 times.
            03 numberslist occurs 2000 times.
              05 num usage pointer synchronized.
-             05 padding1 pic x(32) synchronized.
+             05 mpfr_padding pic x(32) synchronized.
          01 place usage binary-long.
 
        procedure division using token_list, place.

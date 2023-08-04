@@ -23,7 +23,7 @@
            03 token_type pic x(1) synchronized occurs 2000 times.
            03 numberslist occurs 2000 times.
              05 num usage pointer synchronized.
-             05 padding1 pic x(32) synchronized.
+             05 mpfr_padding pic x(32) synchronized.
 
          *> alt_list is for the set of tokens within each parentheses
          *> to then call 'calculate' on. If token_type forms
@@ -33,7 +33,7 @@
            03 alt_token_type pic x(1) synchronized occurs 2000 times.
            03 alt_numslist occurs 2000 times.
              05 alt_num usage pointer synchronized.
-             05 padding5 pic x(32) synchronized.
+             05 alt_mpfr_padding pic x(32) synchronized.
          
          01 c_communication pic x(2000) synchronized.
 
