@@ -28,20 +28,14 @@
            03 token_type pic x(1) synchronized occurs 2000 times.
            03 numberslist occurs 2000 times.
              05 num usage pointer synchronized.
-             05 padding1 pic x(750) synchronized.
+             05 padding1 pic x(32) synchronized.
 
          01 alt_list.
            03 alt_token_type pic x(1) synchronized occurs 2000 times.
            03 alt_numslist occurs 2000 times.
              05 alt_num usage pointer synchronized.
-             05 padding5 pic x(750) synchronized.
+             05 padding5 pic x(32) synchronized.
            
-         01 outdata.
-           05 outnumber usage pointer synchronized.
-           05 padding3 pic x(750).
-         01 parenthdata.
-           05 parenthnumber usage pointer synchronized.
-           05 padding4 pic x(750).
        01 didwefinish pic x(1) value 'F' synchronized.
      
        linkage section.
@@ -50,8 +44,6 @@
        procedure division using c_communication.
       *> copy input to where we can work with it piece-by-piece.
          move c_communication to math_string
-         call 'mpfr_init2' using parenthnumber, by value 4984
-         call 'mpfr_init2' using outnumber, by value 4984
          string 'F' into building_number
          string 'F' into didwefinish
          move 1 to current_token
@@ -87,6 +79,7 @@
            math_string(counter:1) <> '+' and math_string(counter:1) <> '-' and
            math_string(counter:1) <> '(' and math_string(counter:1) <> ')' and
            math_string(counter:1) <> ';' and math_string(counter:1) <> '.' and
+           math_string(counter:1) <> '^' and
            math_string(counter:1) is not numeric then
              string "Bad symbol: " math_string(counter:1) z"." into c_communication
              go to cleanup
@@ -218,14 +211,13 @@
            end-if
          end-perform
 
-         call 'mpfr_set' using outdata, numberslist(1), by value 0
          call 'calculate'
-         using token_list, outdata, c_communication, didwefinish
+         using token_list, c_communication, didwefinish
          if didwefinish <> "T" then
            go to cleanup
          end-if
-         
-         call 'mpfr_sprintf' using temp_str, "%.3Rf", outnumber
+         call 'mpfr_sprintf' using temp_str, z"%.3Rf", numberslist(1)
+
          string 'T' into didwefinish
 
 
@@ -271,8 +263,6 @@
          end-perform.
 
        cleanup.
-         call 'mpfr_clear' using parenthnumber
-         call 'mpfr_clear' using outnumber
          perform varying counter from 1 by 1 until counter = 2000
            call 'mpfr_clear' using numberslist(counter)
            call 'mpfr_clear' using alt_numslist(counter)
@@ -313,9 +303,8 @@
                add 1 to parenthsize
              end-perform
              *> here's where we handle that initial number.
-             call 'mpfr_set' using parenthdata, alt_numslist(2), by value 0
              call 'calculate'
-             using alt_list, parenthdata, c_communication, didwefinish
+             using alt_list, c_communication, didwefinish
              if didwefinish <> "T" then
                move 0 to foundParentheses
                exit section
@@ -323,7 +312,7 @@
              *> this puts the counter back on the start parenthesis.
              subtract 1 from counter
              *> replace start parenthesis with evaluated number.
-             call 'mpfr_set' using numberslist(counter), parenthdata, by value 0
+             call 'mpfr_set' using numberslist(counter), alt_numslist(2), by value 0
              string 'N' into token_type(counter)
              move counter to j
              add parenthsize to j
