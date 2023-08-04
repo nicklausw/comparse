@@ -10,12 +10,12 @@ extern void math_parse(char*);
 
 // case insensitive, check if a starts with b
 bool starts_with(const char *a, const char *b) {
-   if(strncasecmp(a, b, strlen(b)) == 0) return 1;
-   return 0;
+  if(strncasecmp(a, b, strlen(b)) == 0) return 1;
+  return 0;
 }
 
 void on_ready(struct discord *client, const struct discord_ready *event) {
-    log_info("Logged in as %s!", event->user->username);
+  log_info("Logged in as %s!", event->user->username);
 }
 
 void on_message(struct discord *client, const struct discord_message *msg) {
