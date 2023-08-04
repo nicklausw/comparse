@@ -10,10 +10,10 @@
 
        linkage section.
          01 token_list.
-           03 token_type pic x(1) value ';' synchronized occurs 2000 times.
+           03 token_type pic x(1) value ';' occurs 2000 times.
            03 numbers_list occurs 2000 times.
-             05 num usage pointer synchronized.
-             05 mpfr_padding pic x(32) synchronized.
+             05 num usage pointer.
+             05 mpfr_padding pic x(32).
          
        01 c_communication pic x(2000).
        01 passed pic x(1) value 'F'.

@@ -4,8 +4,9 @@
      
        data division.
        working-storage section.
-      *>  temp_str is giant to make sure the message fits 2000 chars.
-         01 temp_str pic x(200000).
+      *>  temp_str cuts some slack to make sure the message fits 2000 chars.
+      *>  honestly not entirely sure if it's necessary.
+         01 temp_str pic x(2500).
          01 math_string pic x(2000).
          01 found_parentheses usage binary-long value 1.
          01 counter usage binary-long value 0.
@@ -22,23 +23,23 @@
          01 current_token usage binary-long value 1.
 
          01 token_list.
-           03 token_type pic x(1) synchronized occurs 2000 times.
+           03 token_type pic x(1) occurs 2000 times.
            03  numbers_list occurs 2000 times.
-             05 num usage pointer synchronized.
-             05 mpfr_padding pic x(32) synchronized.
+             05 num usage pointer.
+             05 mpfr_padding pic x(32).
            
-         01 did_we_finish pic x(1) value 'F' synchronized.
+         01 did_we_finish pic x(1) value 'F'.
 
          *> this is only here so it doesn't get re-initialized and freed
          *> every time reduce_parentheses is called.
          01 alt_list.
-             03 alt_token_type pic x(1) synchronized occurs 2000 times.
+             03 alt_token_type pic x(1) occurs 2000 times.
              03 alt_numslist occurs 2000 times.
-               05 alt_num usage pointer synchronized.
-               05 alt_mpfr_padding pic x(32) synchronized.
+               05 alt_num usage pointer.
+               05 alt_mpfr_padding pic x(32).
      
        linkage section.
-         01 c_communication pic x(2000) synchronized.
+         01 c_communication pic x(2001).
      
        procedure division using c_communication.
       *> copy input to where we can work with it piece-by-piece.
@@ -239,7 +240,7 @@
          end-if
            
          *> we now have the new string's length
-         string x'00' into c_communication(j:1)
+         move x'00' to c_communication(j:1)
          subtract 4 from j
          subtract i from j giving i
          move temp_str(i:4) to c_communication(j:4)

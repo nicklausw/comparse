@@ -17,25 +17,25 @@
        linkage section.
          01 found_parentheses usage binary-long value 1.
 
-         01 did_we_finish pic x(1) value 'F' synchronized.
+         01 did_we_finish pic x(1) value 'F'.
 
          01 token_list.
-           03 token_type pic x(1) synchronized occurs 2000 times.
+           03 token_type pic x(1) occurs 2000 times.
            03 numbers_list occurs 2000 times.
-             05 num usage pointer synchronized.
-             05 mpfr_padding pic x(32) synchronized.
+             05 num usage pointer.
+             05 mpfr_padding pic x(32).
 
          *> alt_list is for the set of tokens within each parentheses
          *> to then call 'calculate' on. If token_type forms
          *> (N+(N+N)) then alt_list will contain N+N 2 times,
          *> once for each set of parentheses
          01 alt_list.
-           03 alt_token_type pic x(1) synchronized occurs 2000 times.
+           03 alt_token_type pic x(1) occurs 2000 times.
            03 alt_numslist occurs 2000 times.
-             05 alt_num usage pointer synchronized.
-             05 alt_mpfr_padding pic x(32) synchronized.
+             05 alt_num usage pointer.
+             05 alt_mpfr_padding pic x(32).
          
-         01 c_communication pic x(2000) synchronized.
+         01 c_communication pic x(2000).
 
        procedure division using alt_list, token_list, did_we_finish, found_parentheses, c_communication.
        
