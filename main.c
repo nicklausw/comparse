@@ -26,8 +26,9 @@ void on_message(struct discord *client, const struct discord_message *msg) {
   }
 
   // subtract space taken by "domath " but let us add a semicolon if needed
+  // (and keep a byte for zero marker)
   // discord messages can be up to 2000 chars long
-  char *s = calloc(2000 - 7 + 1, 1);
+  char *s = calloc(2000 - 7 + 2, 1);
 
   strcpy(s, msg->content + 7);
 
