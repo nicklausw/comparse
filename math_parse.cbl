@@ -51,17 +51,17 @@
          using by reference c_communication.
       *> copy input to where we can work with it piece-by-piece.
          move c_communication to math_string
-         call 'mpfr_init2' using by reference parenthnumber by value 4984 returning nothing
-         call 'mpfr_init2' using by reference outnumber by value 4984 returning nothing
+         call 'mpfr_init2' using by reference parenthnumber by value 4984
+         call 'mpfr_init2' using by reference outnumber by value 4984
          string 'F' into building_number
          string 'F' into didwefinish
          move 1 to current_token
 
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into token_type(counter)
-           call 'mpfr_init2' using by reference num(counter) by value 4984 returning nothing
+           call 'mpfr_init2' using by reference num(counter) by value 4984
            string ';' into alt_token_type(counter)
-           call 'mpfr_init2' using by reference alt_num(counter) by value 4984 returning nothing
+           call 'mpfr_init2' using by reference alt_num(counter) by value 4984
          end-perform
 
          perform varying counter from 1 by 1 until counter = 100
@@ -100,7 +100,7 @@
                string 'N' into token_type(current_token)
                move 1 to building_offset
                move math_string(counter:1) to building_space(building_offset:1)
-               add 1 to building_offset giving building_offset
+               add 1 to building_offset
                exit perform cycle
              else
                move math_string(counter:1) to
@@ -110,7 +110,7 @@
                end-if
 
                if token_type(current_token) = ')' then
-                 subtract 1 from parenthsize giving parenthsize
+                 subtract 1 from parenthsize
                  if parenthsize < 0 then
                    string z"Parenthesis error." into c_communication
                    go to cleanup
@@ -126,41 +126,40 @@
                end-if
               
                if token_type(current_token) = '(' then
-                   add 1 to parenthsize giving parenthsize
+                   add 1 to parenthsize
                  if counter > 1 then
-                   subtract 1 from current_token giving current_token
+                   subtract 1 from current_token
                    if token_type(current_token) = 'N' or token_type(current_token) = ')' then
                      *> implied multiplication
-                     add 1 to current_token giving current_token
+                     add 1 to current_token
                      string '*' into token_type(current_token)
-                     add 1 to current_token giving current_token
+                     add 1 to current_token
                      string '(' into token_type(current_token)
                    else
-                     add 1 to current_token giving current_token
+                     add 1 to current_token
                    end-if
                  end-if
                end-if
-               add 1 to current_token giving current_token
+               add 1 to current_token
              end-if
            else
              if (math_string(counter:1) is numeric) or
               (math_string(counter:1) = '.') then
                move math_string(counter:1) to building_space(building_offset:1)
-               add 1 to building_offset giving building_offset
+               add 1 to building_offset
              else
                string 'F' into building_number
                subtract 1 from building_offset
-                   giving building_offset
                string building_space(1:building_offset) x'00' into temp_str
-               call 'mpfr_set_str' using num(current_token) temp_str by value 10 0 returning nothing
-               add 1 to current_token giving current_token
+               call 'mpfr_set_str' using num(current_token) temp_str by value 10 0
+               add 1 to current_token
                move math_string(counter:1) to token_type(current_token)
                if token_type(current_token) = ';' then
                  exit perform
                end-if
 
                if token_type(current_token) = ')' then
-                 subtract 1 from parenthsize giving parenthsize
+                 subtract 1 from parenthsize
                  if parenthsize < 0 then
                    string z"Parenthesis error." into c_communication
                    go to cleanup
@@ -175,22 +174,22 @@
                  end-if
                end-if
                if token_type(current_token) = '(' then
-                 add 1 to parenthsize giving parenthsize
+                 add 1 to parenthsize
                  if counter > 1 then
-                   subtract 1 from current_token giving current_token
+                   subtract 1 from current_token
                    if token_type(current_token) = 'N' or token_type(current_token) = ')' then
                      *> implied multiplication
-                     add 1 to current_token giving current_token
+                     add 1 to current_token
                      string '*' into token_type(current_token)
-                     add 1 to current_token giving current_token
+                     add 1 to current_token
                      string '(' into token_type(current_token)
                    else
-                     add 1 to current_token giving current_token
+                     add 1 to current_token
                    end-if
                  end-if
                end-if
 
-               add 1 to current_token giving current_token
+               add 1 to current_token
              end-if
            end-if
          end-perform
@@ -200,7 +199,7 @@
            go to cleanup.
 
          move current_token to j
-         subtract 1 from j giving j
+         subtract 1 from j
          if token_type(j) <> 'N' and token_type(j) <> ')' then
            string z"Can't end statement with operator." into c_communication
            go to cleanup.
@@ -227,22 +226,22 @@
            go to cleanup
          end-if
          
-         call 'mpfr_sprintf' using temp_str "%.3Rf" outnumber returning nothing
+         call 'mpfr_sprintf' using temp_str "%.3Rf" outnumber
          string 'T' into didwefinish
 
 
          *> get string length first.
          move 1 to j
          perform until temp_str(j:1) = x'00'
-           add 1 to j giving j
+           add 1 to j
          end-perform
          
          *> subtract ".xxx" and a digit
-         subtract 6 from j giving j
+         subtract 6 from j
          divide j by 3 giving i
          move i to commas
-         add i to j giving j
-         add 6 to j giving j
+         add i to j
+         add 6 to j
          if j > 2001 then
            string z"Error: result can't fit in message." into c_communication
            go to cleanup
@@ -250,34 +249,34 @@
            
          *> we now have the new string's length
          string x'00' into c_communication(j:1)
-         subtract 4 from j giving j
+         subtract 4 from j
          subtract i from j giving i
          move temp_str(i:4) to c_communication(j:4)
-         subtract 1 from j giving j
+         subtract 1 from j
          move 0 to i
          move j to alt_pos
-         subtract commas from alt_pos giving alt_pos
+         subtract commas from alt_pos
 
          *> now copy over the numbers with commas inbetween.
          perform varying counter from j by -1 until counter = 0
            move temp_str(alt_pos:1) to c_communication(counter:1)
            if counter <> 1 then  
-             add 1 to i giving i
+             add 1 to i
            end-if
            if i = 3 then
-             subtract 1 from counter giving counter
+             subtract 1 from counter
              string ',' into c_communication(counter:1)
              move 0 to i
            end-if
-             subtract 1 from alt_pos giving alt_pos
+             subtract 1 from alt_pos
          end-perform.
 
        cleanup.
-         call 'mpfr_clear' using by reference parenthnumber returning nothing
-         call 'mpfr_clear' using by reference outnumber returning nothing
+         call 'mpfr_clear' using by reference parenthnumber
+         call 'mpfr_clear' using by reference outnumber
          perform varying counter from 1 by 1 until counter = 2000
-           call 'mpfr_clear' using by reference numberslist(counter) returning nothing
-           call 'mpfr_clear' using by reference alt_numslist(counter) returning nothing
+           call 'mpfr_clear' using by reference numberslist(counter)
+           call 'mpfr_clear' using by reference alt_numslist(counter)
          end-perform
          
          exit program.
@@ -285,7 +284,7 @@
        parenthLoop.
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into alt_token_type(counter)
-           call 'mpfr_set_d' using by reference alt_numslist(counter) by value 0 0 returning nothing
+           call 'mpfr_set_d' using by reference alt_numslist(counter) by value 0 0
          end-perform
 
          *> we need the semicolon's position.
@@ -304,15 +303,15 @@
            if token_type(counter) = '(' then
              *> say we have a statement: (N+(N*N));
              *> adding 1 to counter focuses on the second N. we're going backwards.
-             add 1 to counter giving counter
+             add 1 to counter
              *> token indexing technically starts at 2 (1 is initial number).
              move 2 to alt_pos
              move 0 to parenthsize
              perform varying j from counter by 1 until j = parenth_pos
                move token_type(j) to alt_token_type(alt_pos)
                call 'mpfr_set' using alt_numslist(alt_pos) numberslist(j) by value 0
-               add 1 to alt_pos giving alt_pos
-               add 1 to parenthsize giving parenthsize
+               add 1 to alt_pos
+               add 1 to parenthsize
              end-perform
              *> here's where we handle that initial number.
              call 'mpfr_set' using parenthdata alt_numslist(2) by value 0
@@ -323,19 +322,19 @@
                exit section
              end-if
              *> this puts the counter back on the start parenthesis.
-             subtract 1 from counter giving counter
+             subtract 1 from counter
              *> replace start parenthesis with evaluated number.
              call 'mpfr_set' using numberslist(counter) parenthdata by value 0
              string 'N' into token_type(counter)
              move counter to j
-             add parenthsize to j giving j
-             add 2 to j giving j
-             add 1 to counter giving counter
+             add parenthsize to j
+             add 2 to j
+             add 1 to counter
              *> counter is at dest, j is at src.
              perform varying j from j by 1 until token_type(j) = ';'
                move token_type(j) to token_type(counter)
                call 'mpfr_set' using numberslist(counter) numberslist(j) by value 0
-               add 1 to counter giving counter
+               add 1 to counter
              end-perform
 
              string ';' into token_type(counter)
