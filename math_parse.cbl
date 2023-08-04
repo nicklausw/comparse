@@ -1,5 +1,5 @@
        identification division.
-       program-id. mathParse.
+       program-id. math_parse.
        environment division.
      
        data division.
