@@ -23,12 +23,14 @@
 
          01 token_list.
            03 token_type pic x(1) synchronized occurs 2000 times.
-           03 numberslist occurs 2000 times.
+           03  numbers_list occurs 2000 times.
              05 num usage pointer synchronized.
              05 mpfr_padding pic x(32) synchronized.
            
-         01 didwefinish pic x(1) value 'F' synchronized.
+         01 did_we_finish pic x(1) value 'F' synchronized.
 
+         *> this is only here so it doesn't get re-initialized and freed
+         *> every time reduce_parentheses is called.
          01 alt_list.
              03 alt_token_type pic x(1) synchronized occurs 2000 times.
              03 alt_numslist occurs 2000 times.
@@ -42,7 +44,7 @@
       *> copy input to where we can work with it piece-by-piece.
          move c_communication to math_string
          string 'F' into building_number
-         string 'F' into didwefinish
+         string 'F' into did_we_finish
          move 1 to current_token
 
          perform varying counter from 1 by 1 until counter = 2000
@@ -200,23 +202,23 @@
 
      *>  parentheses blocks are trouble. let's resolve them.
          move 0 to found_parentheses
-         string "T" into didwefinish
+         string "T" into did_we_finish
          perform until found_parentheses = 1
            call 'reduce_parentheses' using alt_list, token_list,
-           didwefinish, found_parentheses, c_communication
-           if didwefinish <> "T" then
+           did_we_finish, found_parentheses, c_communication
+           if did_we_finish <> "T" then
              go to cleanup
            end-if
          end-perform
 
          call 'calculate'
-         using token_list, c_communication, didwefinish
-         if didwefinish <> "T" then
+         using token_list, c_communication, did_we_finish
+         if did_we_finish <> "T" then
            go to cleanup
          end-if
-         call 'mpfr_sprintf' using temp_str, z"%.3Rf", numberslist(1)
+         call 'mpfr_sprintf' using temp_str, z"%.3Rf", numbers_list(1)
 
-         string 'T' into didwefinish
+         string 'T' into did_we_finish
 
 
          *> get string length first.
@@ -262,7 +264,7 @@
 
        cleanup.
          perform varying counter from 1 by 1 until counter = 2000
-           call 'mpfr_clear' using numberslist(counter)
+           call 'mpfr_clear' using numbers_list(counter)
            call 'mpfr_clear' using alt_numslist(counter)
          end-perform
          

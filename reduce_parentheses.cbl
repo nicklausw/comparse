@@ -17,11 +17,11 @@
        linkage section.
          01 found_parentheses usage binary-long value 1.
 
-         01 didwefinish pic x(1) value 'F' synchronized.
+         01 did_we_finish pic x(1) value 'F' synchronized.
 
          01 token_list.
            03 token_type pic x(1) synchronized occurs 2000 times.
-           03 numberslist occurs 2000 times.
+           03 numbers_list occurs 2000 times.
              05 num usage pointer synchronized.
              05 mpfr_padding pic x(32) synchronized.
 
@@ -37,7 +37,7 @@
          
          01 c_communication pic x(2000) synchronized.
 
-       procedure division using alt_list, token_list, didwefinish, found_parentheses, c_communication.
+       procedure division using alt_list, token_list, did_we_finish, found_parentheses, c_communication.
        
          perform varying counter from 1 by 1 until counter = 2000
            string ';' into alt_token_type(counter)
@@ -68,14 +68,14 @@
              move 0 to parenthsize
              perform varying j from counter by 1 until j = end_parenth_pos
                move token_type(j) to alt_token_type(alt_pos)
-               call 'mpfr_set' using alt_numslist(alt_pos), numberslist(j), by value 0
+               call 'mpfr_set' using alt_numslist(alt_pos), numbers_list(j), by value 0
                add 1 to alt_pos
                add 1 to parenthsize
              end-perform
 
              *> here's where we handle that initial number.
-             call 'calculate' using alt_list, c_communication, didwefinish
-             if didwefinish <> "T" then
+             call 'calculate' using alt_list, c_communication, did_we_finish
+             if did_we_finish <> "T" then
                move 0 to found_parentheses
                exit section
              end-if
@@ -84,8 +84,8 @@
              move start_parenth_pos to counter
 
              *> replace start parenthesis with evaluated number.
-             call 'mpfr_set' using numberslist(counter), alt_numslist(1), by value 0
-             call 'mpfr_printf' using z"%.3Rf", numberslist(counter)
+             call 'mpfr_set' using numbers_list(counter), alt_numslist(1), by value 0
+             call 'mpfr_printf' using z"%.3Rf", numbers_list(counter)
              string 'N' into token_type(counter)
              move counter to j
              add parenthsize to j
@@ -94,7 +94,7 @@
              *> counter is at dest, j is at src.
              perform varying j from j by 1 until token_type(j) = ';'
                move token_type(j) to token_type(counter)
-               call 'mpfr_set' using numberslist(counter), numberslist(j), by value 0
+               call 'mpfr_set' using numbers_list(counter), numbers_list(j), by value 0
                add 1 to counter
              end-perform
 

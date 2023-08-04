@@ -11,7 +11,7 @@
        linkage section.
          01 token_list.
            03 token_type pic x(1) value ';' synchronized occurs 2000 times.
-           03 numberslist occurs 2000 times.
+           03 numbers_list occurs 2000 times.
              05 num usage pointer synchronized.
              05 mpfr_padding pic x(32) synchronized.
          01 place usage binary-long.
@@ -21,7 +21,7 @@
          perform varying i from place by 2 until token_type(i + 2) = ';'
            move token_type(i + 4) to token_type(i + 2)
            move token_type(i + 3) to token_type(i + 1)
-           call 'mpfr_clear' using numberslist(i + 2)
-           move numberslist(i + 4) to numberslist(i + 2)
-           call 'mpfr_init2' using numberslist(i + 4), by value 4984
+           call 'mpfr_clear' using numbers_list(i + 2)
+           move numbers_list(i + 4) to numbers_list(i + 2)
+           call 'mpfr_init2' using numbers_list(i + 4), by value 4984
          end-perform.
